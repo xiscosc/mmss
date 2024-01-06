@@ -1,31 +1,15 @@
 {
+  "extends": ["@tsconfig/strictest/tsconfig", "@tsconfig/node18/tsconfig"],
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "lib": [
-      "es2020",
-      "dom"
-    ],
-    "declaration": true,
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": false,
+    "exactOptionalPropertyTypes": false,
     "inlineSourceMap": true,
     "inlineSources": true,
-    "experimentalDecorators": true,
-    "strictPropertyInitialization": false,
-    "typeRoots": [
-      "./node_modules/@types"
-    ]
+    "typeRoots": ["./node_modules/@types"],
+    "allowSyntheticDefaultImports": true
   },
-  "exclude": [
-    "node_modules",
-    "cdk.out"
-  ]
+  "include": ["lib/**/*", "bin/**/*", "test/**/*", "src/**/*"],
+  "exclude": ["node_modules", "cdk.out"],
+  "ts-node": {
+    "swc": true
+  }
 }
