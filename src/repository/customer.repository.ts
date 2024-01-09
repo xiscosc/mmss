@@ -1,5 +1,5 @@
-import { Customer } from "../type/api.type";
+import { Customer } from '../type/api.type'
 
-export async function getCustomerById(customerId: string): Promise<Customer|null> {
-    return null
+export async function getCustomerById(customerId: string): Promise<Customer | null> {
+  return null
 }
