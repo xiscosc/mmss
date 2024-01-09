@@ -11,3 +11,5 @@ cdk.out
 .vscode
 .idea
 .husky
+
+src/generated/*
