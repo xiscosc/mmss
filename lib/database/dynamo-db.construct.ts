@@ -2,32 +2,36 @@ import { Attribute, AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dy
 import { Construct } from 'constructs'
 
 export function createCustomerTable(scope: Construct, envName: string): Table {
-  return createTable(
-    scope,
-    `${envName}-customer`,
-    {
-      name: 'storeId',
-      type: AttributeType.STRING,
-    },
-    {
-      name: 'phone',
-      type: AttributeType.STRING,
-    },
+  return addUuidGsi(
+    createTable(
+      scope,
+      `${envName}-customer`,
+      {
+        name: 'storeId',
+        type: AttributeType.STRING,
+      },
+      {
+        name: 'phone',
+        type: AttributeType.STRING,
+      },
+    ),
   )
 }
 
 export function createOrderTable(scope: Construct, envName: string): Table {
-  return createTable(
-    scope,
-    `${envName}-order`,
-    {
-      name: 'customerId',
-      type: AttributeType.STRING,
-    },
-    {
-      name: 'timeStamp',
-      type: AttributeType.NUMBER,
-    },
+  return addUuidGsi(
+    createTable(
+      scope,
+      `${envName}-order`,
+      {
+        name: 'customerUuid',
+        type: AttributeType.STRING,
+      },
+      {
+        name: 'timeStamp',
+        type: AttributeType.NUMBER,
+      },
+    ),
   )
 }
 
@@ -36,11 +40,11 @@ export function createItemOrderTable(scope: Construct, envName: string): Table {
     scope,
     `${envName}-item-order`,
     {
-      name: 'orderId',
+      name: 'orderUuid',
       type: AttributeType.STRING,
     },
     {
-      name: 'itemId',
+      name: 'itemUuid',
       type: AttributeType.STRING,
     },
   )
@@ -53,4 +57,16 @@ function createTable(scope: Construct, tableName: string, partitionKey: Attribut
     sortKey,
     billingMode: BillingMode.PAY_PER_REQUEST,
   })
+}
+
+function addUuidGsi(table: Table): Table {
+  table.addGlobalSecondaryIndex({
+    indexName: `uuid`,
+    partitionKey: {
+      name: 'uuid',
+      type: AttributeType.STRING,
+    },
+  })
+
+  return table
 }

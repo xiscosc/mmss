@@ -1,0 +1,138 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "MSS API",
+    "version": "1.0"
+  },
+  "servers": [{ "url": "https://api.mssapp.com/v1" }],
+  "paths": {
+    "/orders/{id}": {
+      "get": {
+        "tags": ["Orders"]
+      },
+      "put": {
+        "tags": ["Orders"]
+      },
+      "delete": {
+        "tags": ["Orders"]
+      }
+    },
+    "/orders/{id}/print": {
+      "get": {
+        "tags": ["Orders"]
+      }
+    },
+    "/orders/{id}/items": {
+      "get": {
+        "tags": ["Orders"]
+      },
+      "post": {
+        "tags": ["Orders"]
+      }
+    },
+    "/orders/{id}/items/{id}": {
+      "get": {
+        "tags": ["Orders"]
+      },
+      "put": {
+        "tags": ["Orders"]
+      },
+      "delete": {
+        "tags": ["Orders"]
+      }
+    },
+    "/customers": {
+      "get": {
+        "tags": ["Customers"],
+        "summary": "Get all customers",
+        "description": "Get all customers",
+        "operationId": "getCustomers",
+        "parameters": [
+          {
+            "name": "phone",
+            "in": "query",
+            "description": "The phone number of the customer",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": ["Customers"]
+      }
+    },
+    "/customers/{id}": {
+      "get": {
+        "tags": ["Customers"]
+      },
+      "put": {
+        "tags": ["Customers"]
+      }
+    },
+    "/customers/{id}/orders": {
+      "get": {
+        "tags": ["Customers"]
+      },
+      "post": {
+        "tags": ["Customers"]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Item": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Customer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "storeId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
