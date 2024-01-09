@@ -14,7 +14,7 @@
     "lint:fix": "eslint --fix .",
     "format:check": "prettier --check --log-level warn .",
     "format:fix": "prettier --write --log-level warn .",
-    "openapi": "openapi-typescript open-api.v1.json --output ./src/generated/radio.openapi.ts"
+    "openapi": "openapi-typescript open-api.v1.json --output ./src/generated/mss.openapi.ts"
   },
   "devDependencies": {
     "@swc/core": "1.3.102",
