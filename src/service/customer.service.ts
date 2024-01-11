@@ -25,7 +25,7 @@ export class CustomerService {
     return await this.repository.getCustomerByPhone(this.storeId, phone)
   }
 
-  public async createCustomer(name: string, phone: string) {
+  public async createCustomer(name: string, phone: string): Promise<Customer> {
     const customer = {
       id: uuidv4(),
       name,
@@ -34,5 +34,6 @@ export class CustomerService {
     }
 
     await this.repository.createCustomer(customer)
+    return customer
   }
 }

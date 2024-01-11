@@ -26,7 +26,7 @@ export class OrderService {
     return orders.filter(order => order.storeId === this.storeId)
   }
 
-  async createOrder(customer: Customer) {
+  async createOrder(customer: Customer): Promise<Order> {
     if (!customer.id || customer.storeId !== this.storeId) {
       throw new Error('Invalid customer data')
     }
@@ -39,5 +39,6 @@ export class OrderService {
     }
 
     await this.repository.createOrder(order)
+    return order
   }
 }

@@ -10,9 +10,6 @@
       "get": {
         "tags": ["Orders"]
       },
-      "put": {
-        "tags": ["Orders"]
-      },
       "delete": {
         "tags": ["Orders"]
       }
