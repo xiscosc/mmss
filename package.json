@@ -26,6 +26,7 @@
     "@types/jest-when": "3.5.2",
     "@types/lambda-log": "3.0.1",
     "@types/node": "20.5.6",
+    "@types/uuid": "9.0.7",
     "aws-cdk": "2.118.0",
     "esbuild": "0.19.11",
     "eslint": "8.56.0",
@@ -51,10 +52,13 @@
     "tsconfig-paths": "4.2.0"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.489.0",
+    "@aws-sdk/lib-dynamodb": "3.489.0",
     "aws-cdk-lib": "2.118.0",
     "constructs": "10.2.70",
     "lambda-log": "3.1.0",
-    "source-map-support": "0.5.21"
+    "source-map-support": "0.5.21",
+    "uuid": "9.0.1"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,yml,yaml,json}": [

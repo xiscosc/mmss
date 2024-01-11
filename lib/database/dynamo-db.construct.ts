@@ -28,7 +28,7 @@ export function createOrderTable(scope: Construct, envName: string): Table {
         type: AttributeType.STRING,
       },
       {
-        name: 'timeStamp',
+        name: 'timestamp',
         type: AttributeType.NUMBER,
       },
     ),

@@ -91,6 +91,9 @@
           "customerId": {
             "type": "string"
           },
+          "storeId": {
+            "type": "string"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
