@@ -5,7 +5,7 @@ import { User } from '../../type/user.type'
 import { badRequest, internalServerError, notFound, ok, isValidUuid } from '../api.helper'
 
 export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
-  const id = event.pathParameters?.['id']
+  const id = event.pathParameters?.['customerId']
   if (!isValidUuid(id)) {
     return badRequest({ message: 'Invalid Id' })
   }

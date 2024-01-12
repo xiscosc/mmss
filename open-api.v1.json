@@ -39,32 +39,17 @@
       }
     },
     "/customers": {
-      "get": {
-        "tags": ["Customers"],
-        "summary": "Get all customers",
-        "description": "Get all customers",
-        "operationId": "getCustomers",
-        "parameters": [
-          {
-            "name": "phone",
-            "in": "query",
-            "description": "The phone number of the customer",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ]
-      },
+      "post": {
+        "tags": ["Customers"]
+      }
+    },
+    "/customers/search": {
       "post": {
         "tags": ["Customers"]
       }
     },
     "/customers/{id}": {
       "get": {
-        "tags": ["Customers"]
-      },
-      "put": {
         "tags": ["Customers"]
       }
     },

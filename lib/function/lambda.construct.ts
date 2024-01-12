@@ -43,18 +43,42 @@ export function createGetOrderLambda(
   return lambda
 }
 
-export function createPostOrderLambda(
+export function createGetCustomerOrdersLambda(
   scope: Construct,
   envName: string,
   orderTable: Table,
   customerTable: Table,
   lambdaDir: string,
 ): LambdaFunction {
-  const lambda = new NodejsFunction(scope, `${envName}-postOrder`, {
+  const lambda = new NodejsFunction(scope, `${envName}-getCustomerOrders`, {
+    ...commonLambdaProps,
+    handler: 'handler',
+    functionName: `${envName}-getOrder`,
+    entry: `${lambdaDir}/orders/get-customer-orders.lambda.ts`,
+    environment: {
+      ORDER_TABLE: orderTable.tableName,
+      CUSTOMER_TABLE: customerTable.tableName,
+    },
+  })
+
+  orderTable.grantReadData(lambda)
+  customerTable.grantReadData(lambda)
+  setFunctionTags(lambda, 'Orders', envName)
+  return lambda
+}
+
+export function createPostCustomerOrderLambda(
+  scope: Construct,
+  envName: string,
+  orderTable: Table,
+  customerTable: Table,
+  lambdaDir: string,
+): LambdaFunction {
+  const lambda = new NodejsFunction(scope, `${envName}-postCustomerOrder`, {
     ...commonLambdaProps,
     handler: 'handler',
     functionName: `${envName}-postOrder`,
-    entry: `${lambdaDir}/orders/post-order.lambda.ts`,
+    entry: `${lambdaDir}/orders/post-customer-order.lambda.ts`,
     environment: {
       ORDER_TABLE: orderTable.tableName,
       CUSTOMER_TABLE: customerTable.tableName,

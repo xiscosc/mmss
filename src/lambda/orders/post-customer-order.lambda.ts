@@ -22,10 +22,8 @@ export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
   try {
     const orderService = new OrderService({} as User)
     const customerService = new CustomerService({} as User)
-
-    const customer = await customerService.getCustomerById(customerId!)
-    if (customer === null) return notFound({ message: `Customer ${customerId} not found` })
-    const order = await orderService.createOrder(customer)
+    const order = await orderService.createOrder(customerService, customerId!)
+    if (order === null) return notFound({ message: `Customer ${customerId} not found` })
     return created(order)
   } catch (err: any) {
     log.error(`Error creating order with customer ${customerId}: ${err.toString()}`)
