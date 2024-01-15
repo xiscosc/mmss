@@ -153,3 +153,27 @@ export function createSearchCustomerLambda(
   setFunctionTags(lambda, 'Customers', envName)
   return lambda
 }
+
+export function createAuthorizerLambda(
+  scope: Construct,
+  envName: string,
+  lambdaDir: string,
+  audience: string,
+  tokenIssuer: string,
+  jwksUri: string,
+): LambdaFunction {
+  const lambda = new NodejsFunction(scope, `${envName}-authorizer`, {
+    ...commonLambdaProps,
+    handler: 'handler',
+    functionName: `${envName}-authorizer`,
+    entry: `${lambdaDir}/auth/auth.lambda.ts`,
+    environment: {
+      AUDIENCE: audience,
+      TOKEN_ISSUER: tokenIssuer,
+      JWKS_URI: jwksUri,
+    },
+  })
+
+  setFunctionTags(lambda, 'Auth', envName)
+  return lambda
+}

@@ -9,10 +9,14 @@ import {
   createPostCustomerOrderLambda,
   createSearchCustomerLambda,
   createGetCustomerOrdersLambda,
+  createAuthorizerLambda,
 } from './function/lambda.construct'
 
 interface MssStackProps extends StackProps {
   envName: string
+  audience: string
+  tokenIssuer: string
+  jwksUri: string
 }
 
 const LAMBDA_DIR = `${__dirname}/../src/lambda/`
@@ -47,6 +51,14 @@ export class MssStack extends Stack {
     const getCustomerLambda = createGetCustomerLambda(this, this.props.envName, customerTable, LAMBDA_DIR)
     const postCustomerLambda = createPostCustomerLambda(this, this.props.envName, customerTable, LAMBDA_DIR)
     const searchCustomerLambda = createSearchCustomerLambda(this, this.props.envName, customerTable, LAMBDA_DIR)
+    const authorizerLambda = createAuthorizerLambda(
+      this,
+      this.props.envName,
+      LAMBDA_DIR,
+      this.props.audience,
+      this.props.tokenIssuer,
+      this.props.jwksUri,
+    )
 
     // Create API Gateway
     const apiLambdaProps = {
@@ -56,6 +68,7 @@ export class MssStack extends Stack {
       getCustomerLambda,
       postCustomerLambda,
       searchCustomerLambda,
+      authorizerLambda,
     }
 
     createApiGateway(this, this.props.envName, apiLambdaProps)
