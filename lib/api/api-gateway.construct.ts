@@ -63,4 +63,3 @@ function addMethod(resource: Resource, httpMethod: string, lambda: Function): Me
     authorizer,
   })
 }
-no
