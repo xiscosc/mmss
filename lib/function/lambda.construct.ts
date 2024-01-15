@@ -53,7 +53,7 @@ export function createGetCustomerOrdersLambda(
   const lambda = new NodejsFunction(scope, `${envName}-getCustomerOrders`, {
     ...commonLambdaProps,
     handler: 'handler',
-    functionName: `${envName}-getOrder`,
+    functionName: `${envName}-getCustomerOrders`,
     entry: `${lambdaDir}/orders/get-customer-orders.lambda.ts`,
     environment: {
       ORDER_TABLE: orderTable.tableName,
@@ -77,7 +77,7 @@ export function createPostCustomerOrderLambda(
   const lambda = new NodejsFunction(scope, `${envName}-postCustomerOrder`, {
     ...commonLambdaProps,
     handler: 'handler',
-    functionName: `${envName}-postOrder`,
+    functionName: `${envName}-postCustomerOrder`,
     entry: `${lambdaDir}/orders/post-customer-order.lambda.ts`,
     environment: {
       ORDER_TABLE: orderTable.tableName,
