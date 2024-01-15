@@ -7,6 +7,9 @@ export class MssApp extends App {
 
     const props = {
       envName: MssApp.getFromEnv('ENV_NAME'),
+      audience: MssApp.getFromEnv('AUDIENCE'),
+      tokenIssuer: MssApp.getFromEnv('TOKEN_ISSUER'),
+      jwksUri: MssApp.getFromEnv('JWKS_URI'),
     }
 
     new MssStack(this, `${props.envName}-mss-stack`, props)
