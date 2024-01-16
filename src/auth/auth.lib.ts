@@ -1,8 +1,14 @@
-import { PolicyDocument, APIGatewayTokenAuthorizerEvent, APIGatewayIAMAuthorizerResult } from 'aws-lambda'
+import {
+  PolicyDocument,
+  APIGatewayTokenAuthorizerEvent,
+  APIGatewayIAMAuthorizerResult,
+  APIGatewayEvent,
+} from 'aws-lambda'
 import { verify, decode, JwtPayload } from 'jsonwebtoken'
 import { JwksClient } from 'jwks-rsa'
 import * as log from 'lambda-log'
 import { env } from '../config/env'
+import { User } from '../type/user.type'
 
 const client = new JwksClient({
   cache: true,
@@ -64,5 +70,19 @@ export async function authenticate(params: APIGatewayTokenAuthorizerEvent): Prom
     principalId: jwtp.sub!!,
     policyDocument: getPolicyDocument('Allow', params.methodArn),
     context: { scope: jwtp['scope'] },
+  }
+}
+
+export function getUserFromEvent(event: APIGatewayEvent): User | null {
+  const { authorizer } = event.requestContext
+  if (!authorizer) return null
+  const { context } = authorizer
+  if (!context) return null
+  if (!context.userId || !context.userName || !context.storeId) return null
+
+  return {
+    id: context.userId!!,
+    name: context.userName!!,
+    storeId: context.storeId!!,
   }
 }

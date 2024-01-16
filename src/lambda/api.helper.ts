@@ -8,6 +8,10 @@ export function badRequest(message: object): ProxyResult {
   return getResponse(400, message)
 }
 
+export function unauthorized(message: object): ProxyResult {
+  return getResponse(401, message)
+}
+
 export function notFound(message: object): ProxyResult {
   return getResponse(404, message)
 }

@@ -7,10 +7,12 @@ import { User } from '../type/user.type'
 export class OrderService {
   private readonly storeId: string
   private repository: OrderRepository
+  private customerService: CustomerService
 
-  constructor(user: User) {
+  constructor(user: User, customerService?: CustomerService) {
     this.storeId = user.storeId
     this.repository = new OrderRepository()
+    this.customerService = customerService ?? new CustomerService(user)
   }
 
   async getOrderById(orderId: string): Promise<Order | null> {
@@ -22,15 +24,15 @@ export class OrderService {
     return null
   }
 
-  async getOrdersByCustomerId(customerService: CustomerService, customerId: string): Promise<Order[] | null> {
-    const customer = await customerService.getCustomerById(customerId)
+  async getOrdersByCustomerId(customerId: string): Promise<Order[] | null> {
+    const customer = await this.customerService.getCustomerById(customerId)
     if (customer === null) return null
     const orders = await this.repository.getOrdersByCustomerId(customerId)
     return orders.filter(order => order.storeId === this.storeId)
   }
 
-  async createOrder(customerService: CustomerService, customerId: string): Promise<Order | null> {
-    const customer = await customerService.getCustomerById(customerId)
+  async createOrder(customerId: string): Promise<Order | null> {
+    const customer = await this.customerService.getCustomerById(customerId)
     if (customer === null) return null
     const order = {
       id: uuidv4(),

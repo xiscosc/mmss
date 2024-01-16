@@ -1,17 +1,20 @@
 import { APIGatewayEvent, ProxyResult } from 'aws-lambda'
 import * as log from 'lambda-log'
+import { getUserFromEvent } from '../../auth/auth.lib'
 import { CustomerService } from '../../service/customer.service'
-import { User } from '../../type/user.type'
-import { badRequest, internalServerError, notFound, ok, isValidUuid } from '../api.helper'
+import { badRequest, internalServerError, notFound, ok, isValidUuid, unauthorized } from '../api.helper'
 
 export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
+  const user = getUserFromEvent(event)
+  if (!user) return unauthorized({ message: 'Unauthorized' })
+
   const id = event.pathParameters?.['customerId']
   if (!isValidUuid(id)) {
     return badRequest({ message: 'Invalid Id' })
   }
 
   try {
-    const service = new CustomerService({} as User)
+    const service = new CustomerService(user)
     const customer = await service.getCustomerById(id!)
     if (customer === null) return notFound({ message: `Customer ${id} not found` })
     return ok(customer)
