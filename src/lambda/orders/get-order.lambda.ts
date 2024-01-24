@@ -7,7 +7,7 @@ import { badRequest, internalServerError, isValidUuid, notFound, ok, unauthorize
 export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
   const user = await getUserFromEvent(event)
   if (!user) return unauthorized({ message: 'Unauthorized' })
-  const id = event.pathParameters?.['id']
+  const id = event.pathParameters?.['orderId']
   if (!isValidUuid(id)) {
     return badRequest({ message: 'Invalid Id' })
   }
