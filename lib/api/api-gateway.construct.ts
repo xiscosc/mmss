@@ -34,7 +34,7 @@ export function createApiGateway(scope: Construct, envName: string, lambdaProps:
   authorizer = new TokenAuthorizer(scope, `${envName}-apiAuthorizer`, {
     handler: lambdaProps.authorizerLambda,
     identitySource: 'method.request.header.Authorization',
-    resultsCacheTtl: Duration.minutes(60),
+    resultsCacheTtl: Duration.minutes(0),
     // eslint-disable-next-line no-useless-escape
     validationRegex: `^Bearer [-0-9a-zA-z\.]*$`,
   })
