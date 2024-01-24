@@ -9,9 +9,9 @@ export class UserRepository extends DynamoRepository<UserDto> {
   }
 
   public async getUserById(userId: string): Promise<User | null> {
-    const dto = await this.get(userId)
-    if (dto) {
-      return UserRepository.fromDto(dto)
+    const dtos = await this.getByPartitionKey(userId)
+    if (dtos.length > 0 && dtos[0]) {
+      return UserRepository.fromDto(dtos[0])
     }
 
     return null

@@ -53,6 +53,10 @@ export abstract class DynamoRepository<T> {
       [this.partitionKey]: partitionKeyValue,
     }
 
+    if (this.sortKey && !sortKeyValue) {
+      throw Error("Sort key value can't be null")
+    }
+
     if (this.sortKey && sortKeyValue) {
       key[this.sortKey] = sortKeyValue
     }
