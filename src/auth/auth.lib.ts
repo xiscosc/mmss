@@ -54,22 +54,40 @@ function getToken(params: APIGatewayTokenAuthorizerEvent): string | undefined {
 }
 
 export async function authenticate(params: APIGatewayTokenAuthorizerEvent): Promise<APIGatewayIAMAuthorizerResult> {
-  const token = getToken(params)
-  if (token === undefined) throw new Error('invalid token')
-  log.info(`token: ${token}`)
+  try {
+    const token = getToken(params)
+    if (token === undefined) throw new Error('invalid token')
+    log.info(`token: ${token}`)
 
-  const decoded = decode(token, { complete: true })
-  if (!decoded || !decoded.header || !decoded.header.kid) {
-    throw new Error('invalid token')
+    const decoded = decode(token, { complete: true })
+    if (!decoded || !decoded.header || !decoded.header.kid) {
+      throw new Error('invalid token')
+    }
+
+    const signingKey = await client.getSigningKey(decoded.header.kid)
+    const publicKey = signingKey.getPublicKey()
+    const jwtp = verify(token, publicKey, jwtOptions) as JwtPayload
+    return {
+      principalId: jwtp.sub!!,
+      policyDocument: getPolicyDocument('Allow', params.methodArn),
+      context: { scope: jwtp['scope'] },
+    }
+  } catch (err: any) {
+    log.error(`Error while verifying the jwt: ${err.toString()}`)
   }
 
-  const signingKey = await client.getSigningKey(decoded.header.kid)
-  const publicKey = signingKey.getPublicKey()
-  const jwtp = verify(token, publicKey, jwtOptions) as JwtPayload
   return {
-    principalId: jwtp.sub!!,
-    policyDocument: getPolicyDocument('Allow', params.methodArn),
-    context: { scope: jwtp['scope'] },
+    principalId: '$context.authorizer.principalId',
+    policyDocument: {
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Action: 'execute-api:Invoke',
+          Effect: 'Deny',
+          Resource: params.methodArn,
+        },
+      ],
+    },
   }
 }
 

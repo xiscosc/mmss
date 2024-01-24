@@ -4,8 +4,8 @@ import { authenticate } from '../../auth/auth.lib'
 
 export async function handler(event: APIGatewayTokenAuthorizerEvent): Promise<APIGatewayIAMAuthorizerResult> {
   try {
-    const data = await authenticate(event)
-    return data
+    const authorizerResult = await authenticate(event)
+    return authorizerResult
   } catch (err: any) {
     log.error(`Error while verifying the jwt: ${err.toString()}`)
     throw new Error(`Error while verifying the jwt: ${err.toString()}`)
