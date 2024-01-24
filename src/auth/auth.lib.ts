@@ -78,20 +78,12 @@ export async function authenticate(params: APIGatewayTokenAuthorizerEvent): Prom
 
   return {
     principalId: '$context.authorizer.principalId',
-    policyDocument: {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Action: 'execute-api:Invoke',
-          Effect: 'Deny',
-          Resource: params.methodArn,
-        },
-      ],
-    },
+    policyDocument: getPolicyDocument('Deny', params.methodArn),
   }
 }
 
 export function getUserFromEvent(event: APIGatewayEvent): User | null {
+  log.info(JSON.stringify(event))
   const { authorizer } = event.requestContext
   if (!authorizer) return null
   const { context } = authorizer
