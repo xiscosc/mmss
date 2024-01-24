@@ -85,7 +85,7 @@ export function createPostCustomerOrderLambda(
     ...commonLambdaProps,
     handler: 'handler',
     functionName: `${envName}-postCustomerOrder`,
-    entry: `${lambdaDir}/orders/post-customer-order.lambda.ts`,
+    entry: `${lambdaDir}/customers/post-customer-order.lambda.ts`,
     environment: {
       ORDER_TABLE: orderTable.tableName,
       CUSTOMER_TABLE: customerTable.tableName,
