@@ -5,7 +5,7 @@ import { CustomerService } from '../../service/customer.service'
 import { badRequest, internalServerError, notFound, ok, isValidUuid, unauthorized } from '../api.helper'
 
 export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
-  const user = getUserFromEvent(event)
+  const user = await getUserFromEvent(event)
   if (!user) return unauthorized({ message: 'Unauthorized' })
 
   const id = event.pathParameters?.['customerId']

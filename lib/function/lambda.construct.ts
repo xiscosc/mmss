@@ -26,6 +26,7 @@ export function createGetOrderLambda(
   scope: Construct,
   envName: string,
   orderTable: Table,
+  userTable: Table,
   lambdaDir: string,
 ): LambdaFunction {
   const lambda = new NodejsFunction(scope, `${envName}-getOrder`, {
@@ -35,10 +36,12 @@ export function createGetOrderLambda(
     entry: `${lambdaDir}/orders/get-order.lambda.ts`,
     environment: {
       ORDER_TABLE: orderTable.tableName,
+      USER_TABLE: userTable.tableName,
     },
   })
 
   orderTable.grantReadData(lambda)
+  userTable.grantReadData(lambda)
   setFunctionTags(lambda, 'Orders', envName)
   return lambda
 }
@@ -48,6 +51,7 @@ export function createGetCustomerOrdersLambda(
   envName: string,
   orderTable: Table,
   customerTable: Table,
+  userTable: Table,
   lambdaDir: string,
 ): LambdaFunction {
   const lambda = new NodejsFunction(scope, `${envName}-getCustomerOrders`, {
@@ -58,11 +62,13 @@ export function createGetCustomerOrdersLambda(
     environment: {
       ORDER_TABLE: orderTable.tableName,
       CUSTOMER_TABLE: customerTable.tableName,
+      USER_TABLE: userTable.tableName,
     },
   })
 
   orderTable.grantReadData(lambda)
   customerTable.grantReadData(lambda)
+  userTable.grantReadData(lambda)
   setFunctionTags(lambda, 'Orders', envName)
   return lambda
 }
@@ -72,6 +78,7 @@ export function createPostCustomerOrderLambda(
   envName: string,
   orderTable: Table,
   customerTable: Table,
+  userTable: Table,
   lambdaDir: string,
 ): LambdaFunction {
   const lambda = new NodejsFunction(scope, `${envName}-postCustomerOrder`, {
@@ -82,11 +89,13 @@ export function createPostCustomerOrderLambda(
     environment: {
       ORDER_TABLE: orderTable.tableName,
       CUSTOMER_TABLE: customerTable.tableName,
+      USER_TABLE: userTable.tableName,
     },
   })
 
   orderTable.grantWriteData(lambda)
   customerTable.grantReadData(lambda)
+  userTable.grantReadData(lambda)
   setFunctionTags(lambda, 'Orders', envName)
   return lambda
 }
@@ -95,27 +104,30 @@ export function createPostCustomerLambda(
   scope: Construct,
   envName: string,
   customerTable: Table,
+  userTable: Table,
   lambdaDir: string,
 ): LambdaFunction {
   const lambda = new NodejsFunction(scope, `${envName}-postCustomer`, {
     ...commonLambdaProps,
     handler: 'handler',
     functionName: `${envName}-postCustomer`,
-    entry: `${lambdaDir}/customers/post-customer.lambda.ts`,
+    entry: `${lambdaDir}/orders/post-customer.lambda.ts`,
     environment: {
       CUSTOMER_TABLE: customerTable.tableName,
+      USER_TABLE: userTable.tableName,
     },
   })
 
   customerTable.grantWriteData(lambda)
-  setFunctionTags(lambda, 'Customers', envName)
+  userTable.grantReadData(lambda)
+  setFunctionTags(lambda, 'Orders', envName)
   return lambda
 }
-
 export function createGetCustomerLambda(
   scope: Construct,
   envName: string,
   customerTable: Table,
+  userTable: Table,
   lambdaDir: string,
 ): LambdaFunction {
   const lambda = new NodejsFunction(scope, `${envName}-getCustomer`, {
@@ -125,10 +137,12 @@ export function createGetCustomerLambda(
     entry: `${lambdaDir}/customers/get-customer.lambda.ts`,
     environment: {
       CUSTOMER_TABLE: customerTable.tableName,
+      USER_TABLE: userTable.tableName,
     },
   })
 
   customerTable.grantReadData(lambda)
+  userTable.grantReadData(lambda)
   setFunctionTags(lambda, 'Customers', envName)
   return lambda
 }
@@ -137,6 +151,7 @@ export function createSearchCustomerLambda(
   scope: Construct,
   envName: string,
   customerTable: Table,
+  userTable: Table,
   lambdaDir: string,
 ): LambdaFunction {
   const lambda = new NodejsFunction(scope, `${envName}-searchCustomer`, {
@@ -146,10 +161,12 @@ export function createSearchCustomerLambda(
     entry: `${lambdaDir}/customers/search-customer.lambda.ts`,
     environment: {
       CUSTOMER_TABLE: customerTable.tableName,
+      USER_TABLE: userTable.tableName,
     },
   })
 
   customerTable.grantReadData(lambda)
+  userTable.grantReadData(lambda)
   setFunctionTags(lambda, 'Customers', envName)
   return lambda
 }

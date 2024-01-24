@@ -6,7 +6,7 @@ import { Customer } from '../../type/api.type'
 import { badRequest, internalServerError, stringIsValid, created, unauthorized } from '../api.helper'
 
 export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
-  const user = getUserFromEvent(event)
+  const user = await getUserFromEvent(event)
   if (!user) return unauthorized({ message: 'Unauthorized' })
 
   const customerData: Customer = JSON.parse(event.body || '{}')

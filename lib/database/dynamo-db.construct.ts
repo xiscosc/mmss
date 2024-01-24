@@ -1,6 +1,21 @@
 import { Attribute, AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb'
 import { Construct } from 'constructs'
 
+export function createUserTable(scope: Construct, envName: string): Table {
+  return createTable(
+    scope,
+    `${envName}-user`,
+    {
+      name: 'userId',
+      type: AttributeType.STRING,
+    },
+    {
+      name: 'storeId',
+      type: AttributeType.STRING,
+    },
+  )
+}
+
 export function createCustomerTable(scope: Construct, envName: string): Table {
   return addUuidGsi(
     createTable(
