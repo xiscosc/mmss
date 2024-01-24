@@ -84,12 +84,12 @@ export async function authenticate(params: APIGatewayTokenAuthorizerEvent): Prom
 }
 
 export async function getUserFromEvent(event: APIGatewayEvent): Promise<User | null> {
-  log.info(JSON.stringify(event))
   const { authorizer } = event.requestContext
   if (!authorizer) return null
   const { principalId } = authorizer
   if (!principalId) return null
   const repository = new UserRepository()
   const user = await repository.getUserById(principalId)
+  log.info(`user found: ${user?.id}}`)
   return user
 }
