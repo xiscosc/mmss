@@ -4,11 +4,13 @@ import { Architecture, Runtime, Function as LambdaFunction } from 'aws-cdk-lib/a
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import { RetentionDays } from 'aws-cdk-lib/aws-logs'
 import { Construct } from 'constructs'
+import { DynamoTableSet, LambdaSet } from '../types'
 
 const commonLambdaProps = {
   runtime: Runtime.NODEJS_20_X,
   architecture: Architecture.ARM_64,
   memorySize: 256,
+  handler: 'handler',
   timeout: Duration.seconds(10),
   logRetention: RetentionDays.ONE_MONTH,
   bundling: {
@@ -17,12 +19,59 @@ const commonLambdaProps = {
   },
 }
 
-function setFunctionTags(i: Construct, area: string, envName: string) {
-  Tags.of(i).add('Environment', envName)
-  Tags.of(i).add('Area', area)
+export function createLambdas(
+  scope: Construct,
+  envName: string,
+  lambdaDir: string,
+  dynamoTables: DynamoTableSet,
+  audience: string,
+  tokenIssuer: string,
+  jwksUri: string,
+): LambdaSet {
+  return {
+    postCustomerLambda: createPostCustomerLambda(
+      scope,
+      envName,
+      dynamoTables.customerTable,
+      dynamoTables.userTable,
+      lambdaDir,
+    ),
+    getCustomerLambda: createGetCustomerLambda(
+      scope,
+      envName,
+      dynamoTables.customerTable,
+      dynamoTables.userTable,
+      lambdaDir,
+    ),
+    searchCustomerLambda: createSearchCustomerLambda(
+      scope,
+      envName,
+      dynamoTables.customerTable,
+      dynamoTables.userTable,
+      lambdaDir,
+    ),
+    postCustomerOrderLambda: createPostCustomerOrderLambda(
+      scope,
+      envName,
+      dynamoTables.orderTable,
+      dynamoTables.customerTable,
+      dynamoTables.userTable,
+      lambdaDir,
+    ),
+    getCustomerOrdersLambda: createGetCustomerOrdersLambda(
+      scope,
+      envName,
+      dynamoTables.orderTable,
+      dynamoTables.customerTable,
+      dynamoTables.userTable,
+      lambdaDir,
+    ),
+    getOrderLambda: createGetOrderLambda(scope, envName, dynamoTables.orderTable, dynamoTables.userTable, lambdaDir),
+    authorizerLambda: createAuthorizerLambda(scope, envName, lambdaDir, audience, tokenIssuer, jwksUri),
+  }
 }
 
-export function createGetOrderLambda(
+function createGetOrderLambda(
   scope: Construct,
   envName: string,
   orderTable: Table,
@@ -31,7 +80,6 @@ export function createGetOrderLambda(
 ): LambdaFunction {
   const lambda = new NodejsFunction(scope, `${envName}-getOrder`, {
     ...commonLambdaProps,
-    handler: 'handler',
     functionName: `${envName}-getOrder`,
     entry: `${lambdaDir}/orders/get-order.lambda.ts`,
     environment: {
@@ -46,7 +94,7 @@ export function createGetOrderLambda(
   return lambda
 }
 
-export function createGetCustomerOrdersLambda(
+function createGetCustomerOrdersLambda(
   scope: Construct,
   envName: string,
   orderTable: Table,
@@ -56,7 +104,6 @@ export function createGetCustomerOrdersLambda(
 ): LambdaFunction {
   const lambda = new NodejsFunction(scope, `${envName}-getCustomerOrders`, {
     ...commonLambdaProps,
-    handler: 'handler',
     functionName: `${envName}-getCustomerOrders`,
     entry: `${lambdaDir}/orders/get-customer-orders.lambda.ts`,
     environment: {
@@ -73,7 +120,7 @@ export function createGetCustomerOrdersLambda(
   return lambda
 }
 
-export function createPostCustomerOrderLambda(
+function createPostCustomerOrderLambda(
   scope: Construct,
   envName: string,
   orderTable: Table,
@@ -83,7 +130,6 @@ export function createPostCustomerOrderLambda(
 ): LambdaFunction {
   const lambda = new NodejsFunction(scope, `${envName}-postCustomerOrder`, {
     ...commonLambdaProps,
-    handler: 'handler',
     functionName: `${envName}-postCustomerOrder`,
     entry: `${lambdaDir}/orders/post-customer-order.lambda.ts`,
     environment: {
@@ -100,7 +146,7 @@ export function createPostCustomerOrderLambda(
   return lambda
 }
 
-export function createPostCustomerLambda(
+function createPostCustomerLambda(
   scope: Construct,
   envName: string,
   customerTable: Table,
@@ -109,7 +155,6 @@ export function createPostCustomerLambda(
 ): LambdaFunction {
   const lambda = new NodejsFunction(scope, `${envName}-postCustomer`, {
     ...commonLambdaProps,
-    handler: 'handler',
     functionName: `${envName}-postCustomer`,
     entry: `${lambdaDir}/customers/post-customer.lambda.ts`,
     environment: {
@@ -123,7 +168,8 @@ export function createPostCustomerLambda(
   setFunctionTags(lambda, 'Orders', envName)
   return lambda
 }
-export function createGetCustomerLambda(
+
+function createGetCustomerLambda(
   scope: Construct,
   envName: string,
   customerTable: Table,
@@ -132,7 +178,6 @@ export function createGetCustomerLambda(
 ): LambdaFunction {
   const lambda = new NodejsFunction(scope, `${envName}-getCustomer`, {
     ...commonLambdaProps,
-    handler: 'handler',
     functionName: `${envName}-getCustomer`,
     entry: `${lambdaDir}/customers/get-customer.lambda.ts`,
     environment: {
@@ -147,7 +192,7 @@ export function createGetCustomerLambda(
   return lambda
 }
 
-export function createSearchCustomerLambda(
+function createSearchCustomerLambda(
   scope: Construct,
   envName: string,
   customerTable: Table,
@@ -156,7 +201,6 @@ export function createSearchCustomerLambda(
 ): LambdaFunction {
   const lambda = new NodejsFunction(scope, `${envName}-searchCustomer`, {
     ...commonLambdaProps,
-    handler: 'handler',
     functionName: `${envName}-searchCustomer`,
     entry: `${lambdaDir}/customers/search-customer.lambda.ts`,
     environment: {
@@ -171,7 +215,7 @@ export function createSearchCustomerLambda(
   return lambda
 }
 
-export function createAuthorizerLambda(
+function createAuthorizerLambda(
   scope: Construct,
   envName: string,
   lambdaDir: string,
@@ -181,7 +225,6 @@ export function createAuthorizerLambda(
 ): LambdaFunction {
   const lambda = new NodejsFunction(scope, `${envName}-authorizer`, {
     ...commonLambdaProps,
-    handler: 'handler',
     functionName: `${envName}-authorizer`,
     entry: `${lambdaDir}/auth/auth.lambda.ts`,
     environment: {
@@ -193,4 +236,9 @@ export function createAuthorizerLambda(
 
   setFunctionTags(lambda, 'Auth', envName)
   return lambda
+}
+
+function setFunctionTags(i: Construct, area: string, envName: string) {
+  Tags.of(i).add('Environment', envName)
+  Tags.of(i).add('Area', area)
 }

@@ -10,20 +10,11 @@ import {
 } from 'aws-cdk-lib/aws-apigateway'
 import { Function } from 'aws-cdk-lib/aws-lambda'
 import { Construct } from 'constructs'
-
-export type ApiLambdaProps = {
-  postCustomerLambda: Function
-  getCustomerLambda: Function
-  searchCustomerLambda: Function
-  postCustomerOrderLambda: Function
-  getCustomerOrdersLambda: Function
-  getOrderLambda: Function
-  authorizerLambda: Function
-}
+import { LambdaSet } from '../types'
 
 let authorizer: TokenAuthorizer
 
-export function createApiGateway(scope: Construct, envName: string, lambdaProps: ApiLambdaProps): RestApi {
+export function createApiGateway(scope: Construct, envName: string, lambdaSet: LambdaSet): RestApi {
   const api = new RestApi(scope, `${envName}-trackListApi`, {
     restApiName: `MSS API - ${envName}`,
     endpointConfiguration: {
@@ -32,7 +23,7 @@ export function createApiGateway(scope: Construct, envName: string, lambdaProps:
   })
 
   authorizer = new TokenAuthorizer(scope, `${envName}-apiAuthorizer`, {
-    handler: lambdaProps.authorizerLambda,
+    handler: lambdaSet.authorizerLambda,
     identitySource: 'method.request.header.Authorization',
     resultsCacheTtl: Duration.minutes(0),
     // eslint-disable-next-line no-useless-escape
@@ -47,12 +38,12 @@ export function createApiGateway(scope: Construct, envName: string, lambdaProps:
   const customerSearchResource = customersResource.addResource('search')
   const customerOrdersResource = customerIdResource.addResource('orders')
 
-  addMethod(orderIdResource, 'GET', lambdaProps.getOrderLambda)
-  addMethod(customersResource, 'POST', lambdaProps.postCustomerLambda)
-  addMethod(customerSearchResource, 'POST', lambdaProps.searchCustomerLambda)
-  addMethod(customerIdResource, 'GET', lambdaProps.getCustomerLambda)
-  addMethod(customerOrdersResource, 'GET', lambdaProps.getCustomerOrdersLambda)
-  addMethod(customerOrdersResource, 'POST', lambdaProps.postCustomerOrderLambda)
+  addMethod(orderIdResource, 'GET', lambdaSet.getOrderLambda)
+  addMethod(customersResource, 'POST', lambdaSet.postCustomerLambda)
+  addMethod(customerSearchResource, 'POST', lambdaSet.searchCustomerLambda)
+  addMethod(customerIdResource, 'GET', lambdaSet.getCustomerLambda)
+  addMethod(customerOrdersResource, 'GET', lambdaSet.getCustomerOrdersLambda)
+  addMethod(customerOrdersResource, 'POST', lambdaSet.postCustomerOrderLambda)
 
   return api
 }

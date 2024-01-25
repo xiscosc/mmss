@@ -3,4 +3,5 @@ export type OrderDto = {
   customerUuid: string
   timestamp: number
   storeId: string
+  userId: string
 }

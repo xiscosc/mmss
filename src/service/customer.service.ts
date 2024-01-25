@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import { CustomerRepository } from '../repository/customer.repository'
-import { Customer } from '../type/api.type'
-import { User } from '../type/user.type'
+import { CustomerDto } from '../repository/dto/customer.dto'
+import { Customer, User } from '../type/api.type'
 
 export class CustomerService {
   private readonly storeId: string
@@ -13,16 +13,17 @@ export class CustomerService {
   }
 
   public async getCustomerById(customerId: string): Promise<Customer | null> {
-    const customer = await this.repository.getCustomerById(customerId)
-    if (customer && customer.storeId === this.storeId) {
-      return customer
+    const customerDto = await this.repository.getCustomerById(customerId)
+    if (customerDto && customerDto.storeId === this.storeId) {
+      return CustomerService.fromDto(customerDto)
     }
 
     return null
   }
 
   public async getCustomerByPhone(phone: string): Promise<Customer | null> {
-    return await this.repository.getCustomerByPhone(this.storeId, phone)
+    const dto = await this.repository.getCustomerByPhone(this.storeId, phone)
+    return dto ? CustomerService.fromDto(dto) : null
   }
 
   public async createCustomer(name: string, phone: string): Promise<Customer> {
@@ -33,7 +34,25 @@ export class CustomerService {
       phone,
     }
 
-    await this.repository.createCustomer(customer)
+    await this.repository.createCustomer(CustomerService.toDto(customer))
     return customer
+  }
+
+  private static fromDto(dto: CustomerDto): Customer {
+    return {
+      id: dto.uuid,
+      name: dto.name,
+      phone: dto.phone,
+      storeId: dto.storeId,
+    }
+  }
+
+  private static toDto(customer: Customer): CustomerDto {
+    return {
+      uuid: customer.id!,
+      name: customer.name!,
+      phone: customer.phone!,
+      storeId: customer.storeId!,
+    }
   }
 }

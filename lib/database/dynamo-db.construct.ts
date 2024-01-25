@@ -1,7 +1,17 @@
 import { Attribute, AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb'
 import { Construct } from 'constructs'
+import { DynamoTableSet } from '../types'
 
-export function createUserTable(scope: Construct, envName: string): Table {
+export function createDynamoTables(scope: Construct, envName: string): DynamoTableSet {
+  return {
+    userTable: createUserTable(scope, envName),
+    customerTable: createCustomerTable(scope, envName),
+    orderTable: createOrderTable(scope, envName),
+    itemOrderTable: createItemOrderTable(scope, envName),
+  }
+}
+
+function createUserTable(scope: Construct, envName: string): Table {
   return createTable(
     scope,
     `${envName}-user`,
@@ -16,7 +26,7 @@ export function createUserTable(scope: Construct, envName: string): Table {
   )
 }
 
-export function createCustomerTable(scope: Construct, envName: string): Table {
+function createCustomerTable(scope: Construct, envName: string): Table {
   return addUuidGsi(
     createTable(
       scope,
@@ -33,7 +43,7 @@ export function createCustomerTable(scope: Construct, envName: string): Table {
   )
 }
 
-export function createOrderTable(scope: Construct, envName: string): Table {
+function createOrderTable(scope: Construct, envName: string): Table {
   return addUuidGsi(
     createTable(
       scope,
@@ -50,7 +60,7 @@ export function createOrderTable(scope: Construct, envName: string): Table {
   )
 }
 
-export function createItemOrderTable(scope: Construct, envName: string): Table {
+function createItemOrderTable(scope: Construct, envName: string): Table {
   return createTable(
     scope,
     `${envName}-item-order`,

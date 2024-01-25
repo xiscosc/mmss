@@ -4,7 +4,7 @@
     "title": "MSS API",
     "version": "1.0"
   },
-  "servers": [{ "url": "https://api.mssapp.com/v1" }],
+  "servers": [{ "url": "https://api.mmssapp.com/v1" }],
   "paths": {
     "/orders/{id}": {
       "get": {
@@ -70,8 +70,8 @@
           "id": {
             "type": "string"
           },
-          "customerId": {
-            "type": "string"
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
           },
           "storeId": {
             "type": "string"
@@ -79,8 +79,12 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
           }
-        }
+        },
+        "required": ["id", "customer", "storeId", "createdAt", "user"]
       },
       "Item": {
         "type": "object",
@@ -116,7 +120,23 @@
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": ["id", "storeId", "name", "phone"]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "storeId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "storeId", "name"]
       }
     }
   }

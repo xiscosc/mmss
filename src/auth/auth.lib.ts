@@ -8,8 +8,8 @@ import { verify, decode, JwtPayload } from 'jsonwebtoken'
 import { JwksClient } from 'jwks-rsa'
 import * as log from 'lambda-log'
 import { env } from '../config/env'
-import { UserRepository } from '../repository/user.repository'
-import { User } from '../type/user.type'
+import { UserService } from '../service/user.service'
+import { User } from '../type/api.type'
 
 const client = new JwksClient({
   cache: true,
@@ -83,13 +83,12 @@ export async function authenticate(params: APIGatewayTokenAuthorizerEvent): Prom
   }
 }
 
-export async function getUserFromEvent(event: APIGatewayEvent): Promise<User | null> {
+export async function getUserFromEvent(event: APIGatewayEvent, userService?: UserService): Promise<User | null> {
   const { authorizer } = event.requestContext
   if (!authorizer) return null
   const { principalId } = authorizer
   if (!principalId) return null
-  const repository = new UserRepository()
-  const user = await repository.getUserById(principalId)
+  const user = await (userService ?? new UserService()).getUserById(principalId)
   log.info(`user found: ${user?.id}}`)
   return user
 }

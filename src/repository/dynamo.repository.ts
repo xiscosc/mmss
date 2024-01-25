@@ -1,5 +1,13 @@
-import { AttributeValue, DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { DynamoDBDocument, DynamoDBDocumentClient, QueryCommand, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb'
+import { AttributeValue, DynamoDBClient, KeysAndAttributes } from '@aws-sdk/client-dynamodb'
+import {
+  DynamoDBDocument,
+  DynamoDBDocumentClient,
+  QueryCommand,
+  GetCommand,
+  PutCommand,
+  BatchGetCommandInput,
+  BatchGetCommand,
+} from '@aws-sdk/lib-dynamodb'
 import * as log from 'lambda-log'
 
 export abstract class DynamoRepository<T> {
@@ -97,6 +105,30 @@ export abstract class DynamoRepository<T> {
       const response = await this.client.send(command)
       if (response.Items) {
         return response.Items as T[]
+      }
+    } catch (error: any) {
+      log.error(error)
+      throw error
+    }
+
+    return []
+  }
+
+  protected async getByPartitionKeys(partitionKeyValues: string[]): Promise<T[]> {
+    const requestItems: { [key: string]: KeysAndAttributes } = {}
+    requestItems[this.table] = {
+      Keys: partitionKeyValues.map(keyValue => ({ [this.partitionKey]: { S: keyValue } })),
+    }
+
+    const params: BatchGetCommandInput = {
+      RequestItems: requestItems,
+    }
+
+    try {
+      const command = new BatchGetCommand(params)
+      const response = await this.client.send(command)
+      if (response.Responses) {
+        return response.Responses[this.table] as T[]
       }
     } catch (error: any) {
       log.error(error)
