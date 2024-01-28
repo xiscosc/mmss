@@ -185,8 +185,8 @@ function createLambda(
   envName: string,
   lambdaDir: string,
   path: string,
-  functionName: string,
   tag: string,
+  functionName: string,
   envVars: Record<string, string>,
 ): LambdaFunction {
   const lambda = new NodejsFunction(scope, `${envName}-${functionName}`, {
