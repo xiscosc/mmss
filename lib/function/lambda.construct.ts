@@ -6,19 +6,6 @@ import { RetentionDays } from 'aws-cdk-lib/aws-logs'
 import { Construct } from 'constructs'
 import { DynamoTableSet, LambdaSet } from '../types'
 
-const commonLambdaProps = {
-  runtime: Runtime.NODEJS_20_X,
-  architecture: Architecture.ARM_64,
-  memorySize: 256,
-  handler: 'handler',
-  timeout: Duration.seconds(10),
-  logRetention: RetentionDays.ONE_MONTH,
-  bundling: {
-    minify: true,
-    sourceMap: true,
-  },
-}
-
 export function createLambdas(
   scope: Construct,
   envName: string,
@@ -28,217 +15,209 @@ export function createLambdas(
   tokenIssuer: string,
   jwksUri: string,
 ): LambdaSet {
-  return {
-    postCustomerLambda: createPostCustomerLambda(
-      scope,
-      envName,
-      dynamoTables.customerTable,
-      dynamoTables.userTable,
-      lambdaDir,
-    ),
-    getCustomerLambda: createGetCustomerLambda(
-      scope,
-      envName,
-      dynamoTables.customerTable,
-      dynamoTables.userTable,
-      lambdaDir,
-    ),
-    searchCustomerLambda: createSearchCustomerLambda(
-      scope,
-      envName,
-      dynamoTables.customerTable,
-      dynamoTables.userTable,
-      lambdaDir,
-    ),
-    postCustomerOrderLambda: createPostCustomerOrderLambda(
-      scope,
-      envName,
-      dynamoTables.orderTable,
-      dynamoTables.customerTable,
-      dynamoTables.userTable,
-      lambdaDir,
-    ),
-    getCustomerOrdersLambda: createGetCustomerOrdersLambda(
-      scope,
-      envName,
-      dynamoTables.orderTable,
-      dynamoTables.customerTable,
-      dynamoTables.userTable,
-      lambdaDir,
-    ),
-    getOrderLambda: createGetOrderLambda(scope, envName, dynamoTables.orderTable, dynamoTables.userTable, lambdaDir),
-    authorizerLambda: createAuthorizerLambda(scope, envName, lambdaDir, audience, tokenIssuer, jwksUri),
+  const defaultEnvVars = {
+    USER_TABLE: dynamoTables.userTable.tableName,
   }
-}
 
-function createGetOrderLambda(
-  scope: Construct,
-  envName: string,
-  orderTable: Table,
-  userTable: Table,
-  lambdaDir: string,
-): LambdaFunction {
-  const lambda = new NodejsFunction(scope, `${envName}-getOrder`, {
-    ...commonLambdaProps,
-    functionName: `${envName}-getOrder`,
-    entry: `${lambdaDir}/orders/get-order.lambda.ts`,
-    environment: {
-      ORDER_TABLE: orderTable.tableName,
-      USER_TABLE: userTable.tableName,
-    },
+  const envVarsForCustomer = {
+    ...defaultEnvVars,
+    CUSTOMER_TABLE: dynamoTables.customerTable.tableName,
+  }
+
+  const envVarsForOrder = {
+    ...defaultEnvVars,
+    ORDER_TABLE: dynamoTables.orderTable.tableName,
+    CUSTOMER_TABLE: dynamoTables.customerTable.tableName,
+  }
+
+  const envVarsForItem = {
+    ...defaultEnvVars,
+    ITEM_ORDER_TABLE: dynamoTables.itemOrderTable.tableName,
+    ORDER_TABLE: dynamoTables.orderTable.tableName,
+    CUSTOMER_TABLE: dynamoTables.customerTable.tableName,
+  }
+
+  const authorizerLambda = createLambda(scope, envName, lambdaDir, '/auth/auth.lambda.ts', 'Auth', 'authorizer', {
+    AUDIENCE: audience,
+    TOKEN_ISSUER: tokenIssuer,
+    JWKS_URI: jwksUri,
   })
 
-  orderTable.grantReadData(lambda)
-  userTable.grantReadData(lambda)
-  setFunctionTags(lambda, 'Orders', envName)
-  return lambda
+  const getCustomerLambda = createLambda(
+    scope,
+    envName,
+    lambdaDir,
+    '/customers/get-customer.lambda.ts',
+    'Customers',
+    'getCustomer',
+    envVarsForCustomer,
+  )
+
+  const searchCustomerLambda = createLambda(
+    scope,
+    envName,
+    lambdaDir,
+    '/customers/search-customer.lambda.ts',
+    'Customers',
+    'searchCustomer',
+    envVarsForCustomer,
+  )
+
+  const postCustomerLambda = createLambda(
+    scope,
+    envName,
+    lambdaDir,
+    '/customers/post-customer.lambda.ts',
+    'Customers',
+    'postCustomer',
+    envVarsForCustomer,
+  )
+
+  const getCustomerOrdersLambda = createLambda(
+    scope,
+    envName,
+    lambdaDir,
+    '/orders/get-customer-orders.lambda.ts',
+    'Orders',
+    'getCustomerOrders',
+    envVarsForOrder,
+  )
+
+  const postCustomerOrderLambda = createLambda(
+    scope,
+    envName,
+    lambdaDir,
+    '/orders/post-customer-order.lambda.ts',
+    'Orders',
+    'postCustomerOrder',
+    envVarsForOrder,
+  )
+
+  const getOrderLambda = createLambda(
+    scope,
+    envName,
+    lambdaDir,
+    '/orders/get-order.lambda.ts',
+    'Orders',
+    'getOrder',
+    envVarsForOrder,
+  )
+
+  const getOrderItemsLambda = createLambda(
+    scope,
+    envName,
+    lambdaDir,
+    '/items/get-order-items.lambda.ts',
+    'Items',
+    'getOrderItems',
+    envVarsForItem,
+  )
+
+  const postOrderItemLambda = createLambda(
+    scope,
+    envName,
+    lambdaDir,
+    '/items/post-order-item.lambda.ts',
+    'Items',
+    'postOrderItem',
+    envVarsForItem,
+  )
+
+  const getOrderItemLambda = createLambda(
+    scope,
+    envName,
+    lambdaDir,
+    '/items/get-order-item.lambda.ts',
+    'Items',
+    'getOrderItem',
+    envVarsForItem,
+  )
+
+  const result = {
+    authorizerLambda,
+    getCustomerLambda,
+    searchCustomerLambda,
+    postCustomerLambda,
+    getCustomerOrdersLambda,
+    postCustomerOrderLambda,
+    getOrderLambda,
+    getOrderItemsLambda,
+    postOrderItemLambda,
+    getOrderItemLambda,
+  }
+
+  // Set tables permissions
+  // All lambdas need read access to user table, except for the authorizerLambda
+  setReadPermissionsForTables(
+    Object.values(result).filter(l => l !== authorizerLambda),
+    [dynamoTables.userTable],
+  )
+
+  // All lambdas need read access to customer table, except for the postCustomerLambda and the authorizerLambda
+  setReadPermissionsForTables(
+    Object.values(result).filter(l => ![postCustomerLambda, authorizerLambda].includes(l)),
+    [dynamoTables.customerTable],
+  )
+
+  // PostCustomerLambda needs write access to customer table
+  setWritePermissionsForTables([postCustomerLambda], [dynamoTables.customerTable])
+
+  // All get order and item lambdas need read access to order table
+  setReadPermissionsForTables(
+    [getCustomerOrdersLambda, getOrderLambda, getOrderItemsLambda, getOrderItemLambda, postOrderItemLambda],
+    [dynamoTables.orderTable],
+  )
+
+  // PostCustomerOrderLambda needs write access to order table
+  setWritePermissionsForTables([postCustomerOrderLambda], [dynamoTables.orderTable])
+
+  // Get item lambdas need read access to item order table
+  setReadPermissionsForTables([getOrderItemsLambda, getOrderItemLambda], [dynamoTables.itemOrderTable])
+
+  // Post item lambda needs write access to item order table
+  setWritePermissionsForTables([postOrderItemLambda], [dynamoTables.itemOrderTable])
+
+  return result
 }
 
-function createGetCustomerOrdersLambda(
-  scope: Construct,
-  envName: string,
-  orderTable: Table,
-  customerTable: Table,
-  userTable: Table,
-  lambdaDir: string,
-): LambdaFunction {
-  const lambda = new NodejsFunction(scope, `${envName}-getCustomerOrders`, {
-    ...commonLambdaProps,
-    functionName: `${envName}-getCustomerOrders`,
-    entry: `${lambdaDir}/orders/get-customer-orders.lambda.ts`,
-    environment: {
-      ORDER_TABLE: orderTable.tableName,
-      CUSTOMER_TABLE: customerTable.tableName,
-      USER_TABLE: userTable.tableName,
-    },
-  })
-
-  orderTable.grantReadData(lambda)
-  customerTable.grantReadData(lambda)
-  userTable.grantReadData(lambda)
-  setFunctionTags(lambda, 'Orders', envName)
-  return lambda
-}
-
-function createPostCustomerOrderLambda(
-  scope: Construct,
-  envName: string,
-  orderTable: Table,
-  customerTable: Table,
-  userTable: Table,
-  lambdaDir: string,
-): LambdaFunction {
-  const lambda = new NodejsFunction(scope, `${envName}-postCustomerOrder`, {
-    ...commonLambdaProps,
-    functionName: `${envName}-postCustomerOrder`,
-    entry: `${lambdaDir}/orders/post-customer-order.lambda.ts`,
-    environment: {
-      ORDER_TABLE: orderTable.tableName,
-      CUSTOMER_TABLE: customerTable.tableName,
-      USER_TABLE: userTable.tableName,
-    },
-  })
-
-  orderTable.grantWriteData(lambda)
-  customerTable.grantReadData(lambda)
-  userTable.grantReadData(lambda)
-  setFunctionTags(lambda, 'Orders', envName)
-  return lambda
-}
-
-function createPostCustomerLambda(
-  scope: Construct,
-  envName: string,
-  customerTable: Table,
-  userTable: Table,
-  lambdaDir: string,
-): LambdaFunction {
-  const lambda = new NodejsFunction(scope, `${envName}-postCustomer`, {
-    ...commonLambdaProps,
-    functionName: `${envName}-postCustomer`,
-    entry: `${lambdaDir}/customers/post-customer.lambda.ts`,
-    environment: {
-      CUSTOMER_TABLE: customerTable.tableName,
-      USER_TABLE: userTable.tableName,
-    },
-  })
-
-  customerTable.grantWriteData(lambda)
-  userTable.grantReadData(lambda)
-  setFunctionTags(lambda, 'Orders', envName)
-  return lambda
-}
-
-function createGetCustomerLambda(
-  scope: Construct,
-  envName: string,
-  customerTable: Table,
-  userTable: Table,
-  lambdaDir: string,
-): LambdaFunction {
-  const lambda = new NodejsFunction(scope, `${envName}-getCustomer`, {
-    ...commonLambdaProps,
-    functionName: `${envName}-getCustomer`,
-    entry: `${lambdaDir}/customers/get-customer.lambda.ts`,
-    environment: {
-      CUSTOMER_TABLE: customerTable.tableName,
-      USER_TABLE: userTable.tableName,
-    },
-  })
-
-  customerTable.grantReadData(lambda)
-  userTable.grantReadData(lambda)
-  setFunctionTags(lambda, 'Customers', envName)
-  return lambda
-}
-
-function createSearchCustomerLambda(
-  scope: Construct,
-  envName: string,
-  customerTable: Table,
-  userTable: Table,
-  lambdaDir: string,
-): LambdaFunction {
-  const lambda = new NodejsFunction(scope, `${envName}-searchCustomer`, {
-    ...commonLambdaProps,
-    functionName: `${envName}-searchCustomer`,
-    entry: `${lambdaDir}/customers/search-customer.lambda.ts`,
-    environment: {
-      CUSTOMER_TABLE: customerTable.tableName,
-      USER_TABLE: userTable.tableName,
-    },
-  })
-
-  customerTable.grantReadData(lambda)
-  userTable.grantReadData(lambda)
-  setFunctionTags(lambda, 'Customers', envName)
-  return lambda
-}
-
-function createAuthorizerLambda(
+function createLambda(
   scope: Construct,
   envName: string,
   lambdaDir: string,
-  audience: string,
-  tokenIssuer: string,
-  jwksUri: string,
+  path: string,
+  functionName: string,
+  tag: string,
+  envVars: Record<string, string>,
 ): LambdaFunction {
-  const lambda = new NodejsFunction(scope, `${envName}-authorizer`, {
-    ...commonLambdaProps,
-    functionName: `${envName}-authorizer`,
-    entry: `${lambdaDir}/auth/auth.lambda.ts`,
-    environment: {
-      AUDIENCE: audience,
-      TOKEN_ISSUER: tokenIssuer,
-      JWKS_URI: jwksUri,
+  const lambda = new NodejsFunction(scope, `${envName}-${functionName}`, {
+    runtime: Runtime.NODEJS_20_X,
+    architecture: Architecture.ARM_64,
+    memorySize: 256,
+    handler: 'handler',
+    timeout: Duration.seconds(10),
+    logRetention: RetentionDays.ONE_MONTH,
+    bundling: {
+      minify: true,
+      sourceMap: true,
     },
+    functionName: `${envName}-${functionName}`,
+    entry: `${lambdaDir}/${path}`,
+    environment: envVars,
   })
 
-  setFunctionTags(lambda, 'Auth', envName)
+  setFunctionTags(lambda, tag, envName)
   return lambda
 }
 
 function setFunctionTags(i: Construct, area: string, envName: string) {
   Tags.of(i).add('Environment', envName)
   Tags.of(i).add('Area', area)
+}
+
+function setReadPermissionsForTables(lambdas: LambdaFunction[], tables: Table[]) {
+  lambdas.forEach(l => tables.forEach(t => t.grantReadData(l)))
+}
+
+function setWritePermissionsForTables(lambdas: LambdaFunction[], tables: Table[]) {
+  lambdas.forEach(l => tables.forEach(t => t.grantWriteData(l)))
 }

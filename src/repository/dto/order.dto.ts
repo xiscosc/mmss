@@ -4,4 +4,5 @@ export type OrderDto = {
   timestamp: number
   storeId: string
   userId: string
+  observations?: string
 }

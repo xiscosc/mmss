@@ -37,6 +37,8 @@ export function createApiGateway(scope: Construct, envName: string, lambdaSet: L
   const customerIdResource = customersResource.addResource('{customerId}')
   const customerSearchResource = customersResource.addResource('search')
   const customerOrdersResource = customerIdResource.addResource('orders')
+  const itemsResource = orderIdResource.addResource('items')
+  const itemIdResource = itemsResource.addResource('{itemId}')
 
   addMethod(orderIdResource, 'GET', lambdaSet.getOrderLambda)
   addMethod(customersResource, 'POST', lambdaSet.postCustomerLambda)
@@ -44,6 +46,9 @@ export function createApiGateway(scope: Construct, envName: string, lambdaSet: L
   addMethod(customerIdResource, 'GET', lambdaSet.getCustomerLambda)
   addMethod(customerOrdersResource, 'GET', lambdaSet.getCustomerOrdersLambda)
   addMethod(customerOrdersResource, 'POST', lambdaSet.postCustomerOrderLambda)
+  addMethod(itemsResource, 'GET', lambdaSet.getOrderItemsLambda)
+  addMethod(itemsResource, 'POST', lambdaSet.postOrderItemLambda)
+  addMethod(itemIdResource, 'GET', lambdaSet.getOrderItemLambda)
 
   return api
 }

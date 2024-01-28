@@ -15,15 +15,10 @@ export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
   }
 
   const orderData: Order = JSON.parse(event.body || '{}')
-  // TODO: Validate order data when new fields are added
-  if (false) {
-    log.info(orderData as any)
-    return badRequest({ message: 'Invalid order data' })
-  }
 
   try {
     const orderService = new OrderService(user)
-    const order = await orderService.createOrder(customerId!)
+    const order = await orderService.createOrder(customerId!, orderData.observations)
     if (order === null) return notFound({ message: `Customer ${customerId} not found` })
     return created(order)
   } catch (err: any) {

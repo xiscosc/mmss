@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
+import { InvalidDataError } from '../error/invalid-data.error'
 import { CustomerRepository } from '../repository/customer.repository'
 import { CustomerDto } from '../repository/dto/customer.dto'
 import { Customer, User } from '../type/api.type'
@@ -34,8 +35,21 @@ export class CustomerService {
       phone,
     }
 
+    CustomerService.validate(customer)
     await this.repository.createCustomer(CustomerService.toDto(customer))
     return customer
+  }
+
+  private static validate(customer: Customer) {
+    if (!customer.name || !customer.phone || customer.name === '' || customer.phone === '') {
+      throw new InvalidDataError('Invalid name and/or phone')
+    }
+
+    // Validate phone format
+    const phoneRegex = /^\+\d{1,3}\d{9,15}$/
+    if (!phoneRegex.test(customer.phone)) {
+      throw new InvalidDataError('Invalid phone format')
+    }
   }
 
   private static fromDto(dto: CustomerDto): Customer {

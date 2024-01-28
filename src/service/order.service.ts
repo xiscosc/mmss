@@ -41,13 +41,14 @@ export class OrderService {
     const filteredOrderDtos = orderDtos.filter(dto => dto.storeId === this.storeId)
     if (filteredOrderDtos.length > 0) {
       const users = await this.userService.getUsersByIds(new Set(filteredOrderDtos.map(dto => dto.userId)))
-      return filteredOrderDtos.map(dto => OrderService.fromDto(dto, customer, users.get(dto.userId)!))
+      const orders = filteredOrderDtos.map(dto => OrderService.fromDto(dto, customer, users.get(dto.userId)!))
+      return orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     }
 
     return []
   }
 
-  async createOrder(customerId: string): Promise<Order | null> {
+  async createOrder(customerId: string, observations?: string): Promise<Order | null> {
     const customer = await this.customerService.getCustomerById(customerId)
     if (customer === null) return null
     const order = {
@@ -56,6 +57,7 @@ export class OrderService {
       createdAt: new Date().toISOString(),
       storeId: this.storeId,
       user: this.currentUser,
+      observations,
     }
 
     await this.repository.createOrder(OrderService.toDto(order))
@@ -69,6 +71,7 @@ export class OrderService {
       createdAt: new Date(dto.timestamp).toISOString(),
       storeId: dto.storeId,
       user,
+      observations: dto.observations,
     }
   }
 
@@ -79,6 +82,7 @@ export class OrderService {
       timestamp: Date.parse(order.createdAt!),
       storeId: order.storeId!,
       userId: order.user.id,
+      observations: order.observations,
     }
   }
 }

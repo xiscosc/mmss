@@ -16,6 +16,9 @@ export type LambdaSet = {
   postCustomerOrderLambda: Function
   getCustomerOrdersLambda: Function
   getOrderLambda: Function
+  getOrderItemsLambda: Function
+  getOrderItemLambda: Function
+  postOrderItemLambda: Function
   authorizerLambda: Function
 }
 

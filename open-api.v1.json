@@ -82,6 +82,9 @@
           },
           "user": {
             "$ref": "#/components/schemas/User"
+          },
+          "observations": {
+            "type": "string"
           }
         },
         "required": ["id", "customer", "storeId", "createdAt", "user"]
@@ -95,11 +98,62 @@
           "orderId": {
             "type": "string"
           },
-          "created_at": {
+          "moldingId": {
+            "type": "string"
+          },
+          "width": {
+            "type": "number",
+            "format": "double"
+          },
+          "height": {
+            "type": "number",
+            "format": "double"
+          },
+          "passePartout": {
+            "type": "boolean"
+          },
+          "passePartoutWidth": {
+            "type": "number",
+            "format": "double"
+          },
+          "passePartoutHeight": {
+            "type": "number",
+            "format": "double"
+          },
+          "glossyGlass": {
+            "type": "boolean"
+          },
+          "mateGlass": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "observations": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "createdAt": {
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "id",
+          "orderId",
+          "moldingId",
+          "width",
+          "height",
+          "passePartout",
+          "glossyGlass",
+          "mateGlass",
+          "description",
+          "observations",
+          "quantity",
+          "createdAt"
+        ]
       },
       "Customer": {
         "type": "object",
