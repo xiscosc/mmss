@@ -24,7 +24,6 @@ export class ItemRepository extends DynamoRepository<ItemDto> {
       !item.moldingId ||
       !item.width ||
       !item.height ||
-      item.passePartout === undefined ||
       item.glossyGlass === undefined ||
       item.mateGlass === undefined ||
       !item.description ||
@@ -35,7 +34,7 @@ export class ItemRepository extends DynamoRepository<ItemDto> {
       throw new Error('Invalid item data')
     }
 
-    if (item.passePartout && (!item.passePartoutWidth || !item.passePartoutHeight)) {
+    if (item.passePartoutId && (!item.passePartoutWidth || !item.passePartoutHeight)) {
       throw new Error('Invalid passe partout data')
     }
 

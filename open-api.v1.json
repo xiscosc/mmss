@@ -109,8 +109,8 @@
             "type": "number",
             "format": "double"
           },
-          "passePartout": {
-            "type": "boolean"
+          "passePartoutId": {
+            "type": "string"
           },
           "passePartoutWidth": {
             "type": "number",
@@ -138,6 +138,9 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "calculatedPrice": {
+            "$ref": "#/components/schemas/CalculatedPrice"
           }
         },
         "required": [
@@ -146,7 +149,6 @@
           "moldingId",
           "width",
           "height",
-          "passePartout",
           "glossyGlass",
           "mateGlass",
           "description",
@@ -154,6 +156,22 @@
           "quantity",
           "createdAt"
         ]
+      },
+      "CalculatedPrice": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "logs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["total", "logs"]
       },
       "Customer": {
         "type": "object",

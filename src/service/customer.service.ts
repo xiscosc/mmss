@@ -1,15 +1,15 @@
 import { v4 as uuidv4 } from 'uuid'
+import { Service } from './service'
 import { InvalidDataError } from '../error/invalid-data.error'
 import { CustomerRepository } from '../repository/customer.repository'
 import { CustomerDto } from '../repository/dto/customer.dto'
 import { Customer, User } from '../type/api.type'
 
-export class CustomerService {
-  private readonly storeId: string
+export class CustomerService extends Service {
   private repository: CustomerRepository
 
   constructor(user: User) {
-    this.storeId = user.storeId
+    super(user)
     this.repository = new CustomerRepository()
   }
 

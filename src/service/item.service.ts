@@ -1,39 +1,35 @@
 import { v4 as uuidv4 } from 'uuid'
 import { OrderService } from './order.service'
+import { Service } from './service'
 import { InvalidDataError } from '../error/invalid-data.error'
 import { ItemDto } from '../repository/dto/item.dto'
 import { ItemRepository } from '../repository/item.repository'
-import { Item, Order, User } from '../type/api.type'
+import { CalculatedPrice, Item, User } from '../type/api.type'
+import { CalculatedPriceDto } from '../repository/dto/calculated-price.dto'
 
-export class ItemService {
+export class ItemService extends Service {
   private itemRepository: ItemRepository
   private orderService: OrderService
-  private readonly storeId: string
 
   constructor(user: User, orderService?: OrderService) {
+    super(user)
     this.itemRepository = new ItemRepository()
-    this.storeId = user.storeId
     this.orderService = orderService ?? new OrderService(user)
-  }
-
-  async getItemByOrderAndId(order: Order, itemId: string): Promise<Item | null> {
-    const item = await this.getItemByOrderParams(itemId, undefined, order)
-    return item
+    this.verifyInjection(this.orderService)
   }
 
   async getItemByOrderIdAndId(orderId: string, itemId: string): Promise<Item | null> {
-    const item = await this.getItemByOrderParams(itemId, orderId)
-    return item
-  }
-
-  async getItemsByOrder(order: Order): Promise<Item[] | null> {
-    const items = await this.getItemsByOrderParams(undefined, order)
-    return items
+    const order = await this.orderService.getOrderById(orderId)
+    if (!order) return null
+    const item = await this.itemRepository.getItemById(order.id, itemId)
+    return item ? ItemService.fromDto(item) : null
   }
 
   async getItemsByOrderId(orderId: string): Promise<Item[] | null> {
-    const items = await this.getItemsByOrderParams(orderId)
-    return items
+    const order = await this.orderService.getOrderById(orderId)
+    if (!order) return null
+    const items = await this.itemRepository.getItemsByOrderId(order.id)
+    return items.map(dto => ItemService.fromDto(dto))
   }
 
   async createItem(
@@ -41,16 +37,16 @@ export class ItemService {
     moldingId: string,
     width: number,
     height: number,
-    passePartout: boolean,
     glossyGlass: boolean,
     mateGlass: boolean,
     description: string,
     observations: string,
     quantity: number,
+    passePartoutId?: string,
     passePartoutWidth?: number,
     passePartoutHeight?: number,
   ): Promise<Item | null> {
-    const verifierdOrder = await this.verifyOrder(orderId)
+    const verifierdOrder = await this.orderService.getOrderById(orderId)
     if (!verifierdOrder) return null
     const item: Item = {
       id: uuidv4(),
@@ -58,7 +54,7 @@ export class ItemService {
       moldingId,
       width,
       height,
-      passePartout,
+      passePartoutId,
       passePartoutWidth,
       passePartoutHeight,
       glossyGlass,
@@ -69,34 +65,19 @@ export class ItemService {
       createdAt: new Date().toISOString(),
     }
 
+    item.calculatedPrice = await this.calculateItemPrice(item)
     ItemService.verifyItem(item)
     await this.itemRepository.createItem(ItemService.toDto(item))
     return item
   }
 
-  private async verifyOrder(orderId?: string, paramOrder?: Order): Promise<Order | null> {
-    let order
-    if (orderId && !paramOrder) {
-      order = await this.orderService.getOrderById(orderId)
-    } else if (paramOrder && !orderId) {
-      order = paramOrder
-    }
+  private async calculateItemPrice(item: Item): Promise<CalculatedPrice> {
+    const logs: string[] = []
+    total = 0.0
 
-    return !order || order.storeId !== this.storeId ? null : order
-  }
 
-  private async getItemByOrderParams(itemId: string, orderId?: string, paramOrder?: Order): Promise<Item | null> {
-    const order = await this.verifyOrder(orderId, paramOrder)
-    if (!order) return null
-    const item = await this.itemRepository.getItemById(order.id, itemId)
-    return item ? ItemService.fromDto(item) : null
-  }
-
-  private async getItemsByOrderParams(orderId?: string, paramOrder?: Order): Promise<Item[] | null> {
-    const order = await this.verifyOrder(orderId, paramOrder)
-    if (!order) return null
-    const items = await this.itemRepository.getItemsByOrderId(order.id)
-    return items.map(dto => ItemService.fromDto(dto))
+    
+    return { total: +this.storeId, logs }
   }
 
   private static verifyItem(item: Item) {
@@ -106,17 +87,17 @@ export class ItemService {
       !!item.moldingId &&
       !!item.width &&
       !!item.height &&
-      item.passePartout !== undefined &&
       item.glossyGlass !== undefined &&
       item.mateGlass !== undefined &&
       !!item.description &&
       !!item.observations &&
       !!item.quantity &&
-      !!item.createdAt
+      !!item.createdAt &&
+      !!item.calculatedPrice
 
     if (!paramVerification) throw new InvalidDataError('Invalid item data')
 
-    if (item.passePartout && (!item.passePartoutWidth || !item.passePartoutHeight)) {
+    if (item.passePartoutId && (!item.passePartoutWidth || !item.passePartoutHeight)) {
       throw new InvalidDataError('Invalid passe partout data')
     }
   }
@@ -128,7 +109,7 @@ export class ItemService {
       moldingId: item.moldingId,
       width: item.width,
       height: item.height,
-      passePartout: item.passePartout,
+      passePartoutId: item.passePartoutId,
       passePartoutWidth: item.passePartoutWidth,
       passePartoutHeight: item.passePartoutHeight,
       glossyGlass: item.glossyGlass,
@@ -137,6 +118,7 @@ export class ItemService {
       observations: item.observations,
       quantity: item.quantity,
       createdAt: Date.parse(item.createdAt),
+      calculatedPrice: ItemService.calculatedPriceToDto(item.calculatedPrice!)
     }
   }
 
@@ -147,7 +129,7 @@ export class ItemService {
       moldingId: dto.moldingId,
       width: dto.width,
       height: dto.height,
-      passePartout: dto.passePartout,
+      passePartoutId: dto.passePartoutId,
       passePartoutWidth: dto.passePartoutWidth,
       passePartoutHeight: dto.passePartoutHeight,
       glossyGlass: dto.glossyGlass,
@@ -156,6 +138,21 @@ export class ItemService {
       observations: dto.observations,
       quantity: dto.quantity,
       createdAt: new Date(dto.createdAt).toISOString(),
+      calculatedPrice: ItemService.calculatedPriceFromDto(dto.calculatedPrice)
+    }
+  }
+
+  private static calculatedPriceToDto(calculatedPrice: CalculatedPrice): CalculatedPriceDto {
+    return {
+      total: calculatedPrice.total,
+      logs: calculatedPrice.logs
+    }
+  }
+
+  private static calculatedPriceFromDto(calculatedPrice: CalculatedPriceDto): CalculatedPrice {
+    return {
+      total: calculatedPrice.total,
+      logs: calculatedPrice.logs
     }
   }
 }

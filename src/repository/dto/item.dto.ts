@@ -1,10 +1,12 @@
+import { CalculatedPriceDto } from "./calculated-price.dto"
+
 export type ItemDto = {
   itemUuid: string
   orderUuid: string
   moldingId: string
   width: number
   height: number
-  passePartout: boolean
+  passePartoutId?: string
   passePartoutWidth?: number
   passePartoutHeight?: number
   glossyGlass: boolean
@@ -12,5 +14,6 @@ export type ItemDto = {
   description: string
   observations: string
   quantity: number
-  createdAt: number
+  createdAt: number,
+  calculatedPrice: CalculatedPriceDto
 }

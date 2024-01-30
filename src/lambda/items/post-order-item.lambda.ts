@@ -20,12 +20,12 @@ export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
       itemData.moldingId,
       itemData.width,
       itemData.height,
-      itemData.passePartout,
       itemData.glossyGlass,
       itemData.mateGlass,
       itemData.description,
       itemData.observations,
       itemData.quantity,
+      itemData.passePartoutId,
       itemData.passePartoutWidth,
       itemData.passePartoutHeight,
     )

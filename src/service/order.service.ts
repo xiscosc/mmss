@@ -1,23 +1,24 @@
 import { v4 as uuidv4 } from 'uuid'
 import { CustomerService } from './customer.service'
+import { Service } from './service'
 import { UserService } from './user.service'
 import { OrderDto } from '../repository/dto/order.dto'
 import { OrderRepository } from '../repository/order.repository'
 import { Customer, Order, User } from '../type/api.type'
 
-export class OrderService {
-  private readonly storeId: string
+export class OrderService extends Service {
   private repository: OrderRepository
   private customerService: CustomerService
   private userService: UserService
-  private currentUser: User
 
   constructor(user: User, customerService?: CustomerService, userService?: UserService) {
-    this.storeId = user.storeId
+    super(user)
     this.repository = new OrderRepository()
     this.customerService = customerService ?? new CustomerService(user)
-    this.userService = userService ?? new UserService()
-    this.currentUser = user
+    this.userService = userService ?? new UserService(user)
+
+    this.verifyInjection(this.customerService)
+    this.verifyInjection(this.userService)
   }
 
   async getOrderById(orderId: string): Promise<Order | null> {
@@ -56,7 +57,7 @@ export class OrderService {
       customer,
       createdAt: new Date().toISOString(),
       storeId: this.storeId,
-      user: this.currentUser,
+      user: this.user,
       observations,
     }
 
