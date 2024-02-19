@@ -77,14 +77,10 @@ function createItemOrderTable(scope: Construct, envName: string): Table {
 }
 
 function createCalculatedItemOrderTable(scope: Construct, envName: string): Table {
-  return createTable(
-    scope,
-    `${envName}-calculated-item-order`,
-    {
-      name: 'itemUuid',
-      type: AttributeType.STRING,
-    },
-  )
+  return createTable(scope, `${envName}-calculated-item-order`, {
+    name: 'itemUuid',
+    type: AttributeType.STRING,
+  })
 }
 
 function createTable(scope: Construct, tableName: string, partitionKey: Attribute, sortKey?: Attribute): Table {

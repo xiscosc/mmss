@@ -94,7 +94,7 @@ export class ItemService {
       throw new InvalidDataError('Invalid item data')
     }
 
-    if ((item.passePartoutId != null) && (item.passePartoutWidth == null || item.passePartoutHeight == null)) {
+    if (item.passePartoutId != null && (item.passePartoutWidth == null || item.passePartoutHeight == null)) {
       throw new InvalidDataError('Invalid item data')
     }
   }
