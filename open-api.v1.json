@@ -109,8 +109,8 @@
             "type": "number",
             "format": "double"
           },
-          "passePartout": {
-            "type": "boolean"
+          "passePartoutId": {
+            "type": "string"
           },
           "passePartoutWidth": {
             "type": "number",
@@ -120,11 +120,8 @@
             "type": "number",
             "format": "double"
           },
-          "glossyGlass": {
-            "type": "boolean"
-          },
-          "mateGlass": {
-            "type": "boolean"
+          "glassId": {
+            "type": "string"
           },
           "description": {
             "type": "string"
@@ -146,14 +143,42 @@
           "moldingId",
           "width",
           "height",
-          "passePartout",
-          "glossyGlass",
-          "mateGlass",
+          "glassId",
           "description",
           "observations",
           "quantity",
           "createdAt"
         ]
+      },
+      "CalculatedItem": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string"
+          },
+          "discount": {
+            "type": "number",
+            "format": "double"
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "price": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "quantity": {
+                  "type": "integer"
+                },
+                "log": {
+                  "type": "string"
+                }
+              }
+            }
+          } 
+        }
       },
       "Customer": {
         "type": "object",

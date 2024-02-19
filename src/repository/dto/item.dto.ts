@@ -4,11 +4,10 @@ export type ItemDto = {
   moldingId: string
   width: number
   height: number
-  passePartout: boolean
+  passePartoutId?: string
   passePartoutWidth?: number
   passePartoutHeight?: number
-  glossyGlass: boolean
-  mateGlass: boolean
+  glassId: string
   description: string
   observations: string
   quantity: number

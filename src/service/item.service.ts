@@ -16,24 +16,18 @@ export class ItemService {
     this.orderService = orderService ?? new OrderService(user)
   }
 
-  async getItemByOrderAndId(order: Order, itemId: string): Promise<Item | null> {
-    const item = await this.getItemByOrderParams(itemId, undefined, order)
-    return item
-  }
-
   async getItemByOrderIdAndId(orderId: string, itemId: string): Promise<Item | null> {
-    const item = await this.getItemByOrderParams(itemId, orderId)
-    return item
-  }
-
-  async getItemsByOrder(order: Order): Promise<Item[] | null> {
-    const items = await this.getItemsByOrderParams(undefined, order)
-    return items
+    const order = await this.orderService.getOrderById(orderId)
+    if (!order) return null
+    const item = await this.itemRepository.getItemById(order.id, itemId)
+    return item ? ItemService.fromDto(item) : null
   }
 
   async getItemsByOrderId(orderId: string): Promise<Item[] | null> {
-    const items = await this.getItemsByOrderParams(orderId)
-    return items
+    const order = await this.orderService.getOrderById(orderId)
+    if (!order) return null
+    const items = await this.itemRepository.getItemsByOrderId(order.id)
+    return items.map(dto => ItemService.fromDto(dto))
   }
 
   async createItem(
@@ -41,12 +35,11 @@ export class ItemService {
     moldingId: string,
     width: number,
     height: number,
-    passePartout: boolean,
-    glossyGlass: boolean,
-    mateGlass: boolean,
+    glassId: string,
     description: string,
     observations: string,
     quantity: number,
+    passePartoutId?: string,
     passePartoutWidth?: number,
     passePartoutHeight?: number,
   ): Promise<Item | null> {
@@ -58,11 +51,10 @@ export class ItemService {
       moldingId,
       width,
       height,
-      passePartout,
+      passePartoutId,
       passePartoutWidth,
       passePartoutHeight,
-      glossyGlass,
-      mateGlass,
+      glassId,
       description,
       observations,
       quantity,
@@ -85,39 +77,25 @@ export class ItemService {
     return !order || order.storeId !== this.storeId ? null : order
   }
 
-  private async getItemByOrderParams(itemId: string, orderId?: string, paramOrder?: Order): Promise<Item | null> {
-    const order = await this.verifyOrder(orderId, paramOrder)
-    if (!order) return null
-    const item = await this.itemRepository.getItemById(order.id, itemId)
-    return item ? ItemService.fromDto(item) : null
-  }
-
-  private async getItemsByOrderParams(orderId?: string, paramOrder?: Order): Promise<Item[] | null> {
-    const order = await this.verifyOrder(orderId, paramOrder)
-    if (!order) return null
-    const items = await this.itemRepository.getItemsByOrderId(order.id)
-    return items.map(dto => ItemService.fromDto(dto))
-  }
-
   private static verifyItem(item: Item) {
-    const paramVerification =
-      !!item.id &&
-      !!item.orderId &&
-      !!item.moldingId &&
-      !!item.width &&
-      !!item.height &&
-      item.passePartout !== undefined &&
-      item.glossyGlass !== undefined &&
-      item.mateGlass !== undefined &&
-      !!item.description &&
-      !!item.observations &&
-      !!item.quantity &&
-      !!item.createdAt
+    // Method that check that all fields are not null and not undefined
+    if (
+      !item.id ||
+      !item.orderId ||
+      !item.moldingId ||
+      !item.width ||
+      !item.height ||
+      !item.glassId ||
+      !item.description ||
+      !item.observations ||
+      !item.quantity ||
+      !item.createdAt
+    ) {
+      throw new InvalidDataError('Invalid item data')
+    }
 
-    if (!paramVerification) throw new InvalidDataError('Invalid item data')
-
-    if (item.passePartout && (!item.passePartoutWidth || !item.passePartoutHeight)) {
-      throw new InvalidDataError('Invalid passe partout data')
+    if ((item.passePartoutId != null) && (item.passePartoutWidth == null || item.passePartoutHeight == null)) {
+      throw new InvalidDataError('Invalid item data')
     }
   }
 
@@ -128,11 +106,10 @@ export class ItemService {
       moldingId: item.moldingId,
       width: item.width,
       height: item.height,
-      passePartout: item.passePartout,
+      passePartoutId: item.passePartoutId,
       passePartoutWidth: item.passePartoutWidth,
       passePartoutHeight: item.passePartoutHeight,
-      glossyGlass: item.glossyGlass,
-      mateGlass: item.mateGlass,
+      glassId: item.glassId,
       description: item.description,
       observations: item.observations,
       quantity: item.quantity,
@@ -147,11 +124,10 @@ export class ItemService {
       moldingId: dto.moldingId,
       width: dto.width,
       height: dto.height,
-      passePartout: dto.passePartout,
+      passePartoutId: dto.passePartoutId,
       passePartoutWidth: dto.passePartoutWidth,
       passePartoutHeight: dto.passePartoutHeight,
-      glossyGlass: dto.glossyGlass,
-      mateGlass: dto.mateGlass,
+      glassId: dto.glassId,
       description: dto.description,
       observations: dto.observations,
       quantity: dto.quantity,

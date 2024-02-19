@@ -18,27 +18,6 @@ export class ItemRepository extends DynamoRepository<ItemDto> {
   }
 
   public async createItem(item: ItemDto) {
-    if (
-      !item.itemUuid ||
-      !item.orderUuid ||
-      !item.moldingId ||
-      !item.width ||
-      !item.height ||
-      item.passePartout === undefined ||
-      item.glossyGlass === undefined ||
-      item.mateGlass === undefined ||
-      !item.description ||
-      !item.observations ||
-      !item.quantity ||
-      !item.createdAt
-    ) {
-      throw new Error('Invalid item data')
-    }
-
-    if (item.passePartout && (!item.passePartoutWidth || !item.passePartoutHeight)) {
-      throw new Error('Invalid passe partout data')
-    }
-
     await this.put(item)
   }
 }

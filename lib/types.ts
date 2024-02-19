@@ -27,4 +27,5 @@ export type DynamoTableSet = {
   customerTable: Table
   orderTable: Table
   itemOrderTable: Table
+  calculatedItemOrderTable: Table
 }
