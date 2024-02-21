@@ -39,9 +39,9 @@ export class ItemService {
     description: string,
     observations: string,
     quantity: number,
+    passePartoutWidth: number,
+    passePartoutHeight: number,
     passePartoutId?: string,
-    passePartoutWidth?: number,
-    passePartoutHeight?: number,
   ): Promise<Item | null> {
     const verifierdOrder = await this.verifyOrder(orderId)
     if (!verifierdOrder) return null

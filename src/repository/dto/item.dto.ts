@@ -5,8 +5,8 @@ export type ItemDto = {
   width: number
   height: number
   passePartoutId?: string
-  passePartoutWidth?: number
-  passePartoutHeight?: number
+  passePartoutWidth: number
+  passePartoutHeight: number
   glassId: string
   description: string
   observations: string

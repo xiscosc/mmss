@@ -2,7 +2,7 @@ import { CalculatedItemDto } from './dto/calculated-item.dto'
 import { DynamoRepository } from './dynamo.repository'
 import { env } from '../config/env'
 
-export class ItemRepository extends DynamoRepository<CalculatedItemDto> {
+export class CalculatedItemRepository extends DynamoRepository<CalculatedItemDto> {
   constructor() {
     super(env.calculatedItemOrderTable, 'itemUuid')
   }

@@ -147,7 +147,9 @@
           "description",
           "observations",
           "quantity",
-          "createdAt"
+          "createdAt",
+          "passePartoutHeight",
+          "passePartoutWidth"
         ]
       },
       "CalculatedItem": {
@@ -163,22 +165,11 @@
           "parts": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "price": {
-                  "type": "number",
-                  "format": "double"
-                },
-                "quantity": {
-                  "type": "integer"
-                },
-                "log": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/components/schemas/CalculatedItemPart"
             }
           }
-        }
+        },
+        "required": ["itemId", "discount", "parts"]
       },
       "Customer": {
         "type": "object",
@@ -216,6 +207,25 @@
           }
         },
         "required": ["id", "storeId", "name"]
+      },
+      "CalculatedItemPart": {
+        "type": "object",
+        "properties": {
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "description": {
+            "type": "string"
+          },
+          "log": {
+            "type": "string"
+          }
+        },
+        "required": ["price", "quantity", "description"]
       }
     }
   }
