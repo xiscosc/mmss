@@ -1,11 +1,11 @@
-import { PricingFile, PricingProvider } from "../data/pricing.provider"
-import { CalculatedItemRepository } from "../repository/calculated-item.repository"
-import { CalculatedItemDto } from "../repository/dto/calculated-item.dto"
-import { CalculatedItem, CalculatedItemPart, Item } from "../type/api.type"
+import { PricingFile, PricingProvider } from '../data/pricing.provider'
+import { CalculatedItemRepository } from '../repository/calculated-item.repository'
+import { CalculatedItemDto } from '../repository/dto/calculated-item.dto'
+import { CalculatedItem, CalculatedItemPart, Item } from '../type/api.type'
 
 export class CalculatedItemService {
-    private calculatedItemRepository: CalculatedItemRepository
-    private pricingProvider: PricingProvider
+  private calculatedItemRepository: CalculatedItemRepository
+  private pricingProvider: PricingProvider
 
   constructor() {
     this.calculatedItemRepository = new CalculatedItemRepository()
@@ -17,22 +17,30 @@ export class CalculatedItemService {
     return dto ? CalculatedItemService.fromDto(dto) : null
   }
 
-  public async createCalculatedItem(item: Item, discount: number, extraParts: CalculatedItemPart[]): Promise<CalculatedItem> {
+  public async createCalculatedItem(
+    item: Item,
+    discount: number,
+    extraParts: CalculatedItemPart[],
+  ): Promise<CalculatedItem> {
     const calculatedItem: CalculatedItem = {
       itemId: item.id,
       discount,
       parts: [],
-      total: 0
+      total: 0,
     }
 
-    const workingHeight = CalculatedItemService.roundUpToNearestGreaterFiveOrTen(item.width + 2 * item.passePartoutWidth)
-    const workingWidth = CalculatedItemService.roundUpToNearestGreaterFiveOrTen(item.height + 2 * item.passePartoutHeight)
+    const workingHeight = CalculatedItemService.roundUpToNearestGreaterFiveOrTen(
+      item.width + 2 * item.passePartoutWidth,
+    )
+    const workingWidth = CalculatedItemService.roundUpToNearestGreaterFiveOrTen(
+      item.height + 2 * item.passePartoutHeight,
+    )
 
     const parts = await Promise.all([
-        this.getMoldingPart(item.moldingId, workingWidth, workingHeight),
-        this.getGlassPart(item.glassId, workingWidth, workingHeight),
-        this.getBackPart(workingWidth, workingHeight),
-        this.getPPPart(workingWidth, workingHeight, item.passePartoutId),
+      this.getMoldingPart(item.moldingId, workingWidth, workingHeight),
+      this.getGlassPart(item.glassId, workingWidth, workingHeight),
+      this.getBackPart(workingWidth, workingHeight),
+      this.getPPPart(workingWidth, workingHeight, item.passePartoutId),
     ])
 
     calculatedItem.parts.push(...parts)
@@ -41,20 +49,19 @@ export class CalculatedItemService {
     calculatedItem.total = CalculatedItemService.getTotalPrice(calculatedItem)
     await this.calculatedItemRepository.createCalculatedItem(CalculatedItemService.toDto(calculatedItem))
     return calculatedItem
-   }
+  }
 
-   private static getTotalPrice(calculatedItem: CalculatedItem): number {
+  private static getTotalPrice(calculatedItem: CalculatedItem): number {
     const subtotal = calculatedItem.parts.reduce((total, part) => total + part.price * part.quantity, 0)
     return subtotal * (1 - calculatedItem.discount)
-   }
-    
+  }
 
   private static fromDto(dto: CalculatedItemDto): CalculatedItem {
     return {
       itemId: dto.itemUuid,
       discount: dto.discount,
       parts: dto.parts,
-      total: dto.total
+      total: dto.total,
     }
   }
 
@@ -63,7 +70,7 @@ export class CalculatedItemService {
       itemUuid: calculatedItem.itemId,
       discount: calculatedItem.discount,
       parts: calculatedItem.parts,
-      total: calculatedItem.total
+      total: calculatedItem.total,
     }
   }
 
@@ -79,38 +86,43 @@ export class CalculatedItemService {
     const moldingPrice = await this.pricingProvider.getValueFromListById(PricingFile.MOLDS, moldingId)
     const moldingFactor = await this.pricingProvider.getValueFromMatrixByDimensions(PricingFile.MOLDS, width, height)
     return {
-        price: moldingPrice * moldingFactor,
-        quantity: 1,
-        description: `Moldura ${moldingId} ${width}x${height}`,
+      price: moldingPrice * moldingFactor,
+      quantity: 1,
+      description: `Moldura ${moldingId} ${width}x${height}`,
     }
   }
 
   private async getGlassPart(glassId: string, width: number, height: number): Promise<CalculatedItemPart> {
-    const glassPrice = await this.pricingProvider.getValueFromMatrixByDimensions(PricingFile.GLASS, width, height, glassId)
+    const glassPrice = await this.pricingProvider.getValueFromMatrixByDimensions(
+      PricingFile.GLASS,
+      width,
+      height,
+      glassId,
+    )
     return {
-        price: glassPrice,
-        quantity: 1,
-        description: `Cristal ${glassId} ${width}x${height}`,
+      price: glassPrice,
+      quantity: 1,
+      description: `Cristal ${glassId} ${width}x${height}`,
     }
   }
 
   private async getBackPart(width: number, height: number): Promise<CalculatedItemPart> {
     const backPrice = await this.pricingProvider.getValueFromMatrixByDimensions(PricingFile.BACK, width, height)
     return {
-        price: backPrice,
-        quantity: 1,
-        description: `Trasera ${width}x${height}`,
+      price: backPrice,
+      quantity: 1,
+      description: `Trasera ${width}x${height}`,
     }
   }
 
   private async getPPPart(width: number, height: number, ppId?: string): Promise<CalculatedItemPart> {
     let ppPrice = 0
     if (ppId != null) ppPrice = await this.pricingProvider.getAreaValueFromList(PricingFile.PP, height, width, ppId)
-  
+
     return {
-        price: ppPrice,
-        quantity: 1,
-        description: ppPrice ? `Passepartout ${ppId} ${width}x${height}` : `No Passepartout`,
+      price: ppPrice,
+      quantity: 1,
+      description: ppPrice ? `Passepartout ${ppId} ${width}x${height}` : `No Passepartout`,
     }
   }
 }

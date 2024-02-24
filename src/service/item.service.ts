@@ -30,7 +30,7 @@ export class ItemService {
     const item = ItemService.fromDto(itemDto)
     const calculatedItem = await this.calculatedItemService.getCalculatedItem(item.id)
     if (calculatedItem == null) return null
-    return {item, calculatedItem}
+    return { item, calculatedItem }
   }
 
   async getItemsByOrderId(orderId: string): Promise<ItemResponse[] | null> {
@@ -38,11 +38,11 @@ export class ItemService {
     if (!order) return null
     const itemDtos = await this.itemRepository.getItemsByOrderId(order.id)
     const itemMap = new Map<string, ItemResponse>()
-    itemDtos.forEach(dto => itemMap.set(dto.itemUuid, {item: ItemService.fromDto(dto)}))
+    itemDtos.forEach(dto => itemMap.set(dto.itemUuid, { item: ItemService.fromDto(dto) }))
     const itemIds = Array.from(itemMap.keys())
     const calculatedItems = await Promise.all(itemIds.map(id => this.calculatedItemService.getCalculatedItem(id)))
     calculatedItems.forEach(ci => {
-      if (ci != null)  itemMap.get(ci.itemId)!.calculatedItem = ci
+      if (ci != null) itemMap.get(ci.itemId)!.calculatedItem = ci
     })
     return Array.from(itemMap.values())
   }
@@ -83,7 +83,7 @@ export class ItemService {
     ItemService.verifyItem(item)
     await this.itemRepository.createItem(ItemService.toDto(item))
     const calculatedItem = await this.calculatedItemService.createCalculatedItem(item, discount, extraParts)
-    return {item, calculatedItem}
+    return { item, calculatedItem }
   }
 
   private async verifyOrder(orderId?: string, paramOrder?: Order): Promise<Order | null> {

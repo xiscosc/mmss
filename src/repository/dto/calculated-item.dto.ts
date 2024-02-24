@@ -1,7 +1,7 @@
 export type CalculatedItemDto = {
   itemUuid: string
   discount: number
-  parts: CalculatedItemPartDto[],
+  parts: CalculatedItemPartDto[]
   total: number
 }
 
