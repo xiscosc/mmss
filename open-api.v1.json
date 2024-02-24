@@ -167,9 +167,24 @@
             "items": {
               "$ref": "#/components/schemas/CalculatedItemPart"
             }
+          },
+          "total": {
+            "type": "number"
           }
         },
-        "required": ["itemId", "discount", "parts"]
+        "required": ["itemId", "discount", "parts", "total"]
+      },
+      "ItemResponse": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/Item"
+          },
+          "calculatedItem": {
+            "$ref": "#/components/schemas/CalculatedItem"
+          }
+        },
+        "required": ["item"]
       },
       "Customer": {
         "type": "object",

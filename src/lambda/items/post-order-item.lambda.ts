@@ -3,7 +3,7 @@ import * as log from 'lambda-log'
 import { getUserFromEvent } from '../../auth/auth.lib'
 import { InvalidDataError } from '../../error/invalid-data.error'
 import { ItemService } from '../../service/item.service'
-import { Item } from '../../type/api.type'
+import { PostItem } from '../../type/api.type'
 import { badRequest, internalServerError, isValidUuid, notFound, created, unauthorized } from '../api.helper'
 
 export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
@@ -11,7 +11,7 @@ export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
   if (!user) return unauthorized({ message: 'Unauthorized' })
   const orderId = event.pathParameters?.['orderId']
   if (!isValidUuid(orderId)) return badRequest({ message: 'Invalid orderId' })
-  const itemData: Item = JSON.parse(event.body || '{}')
+  const itemData: PostItem = JSON.parse(event.body || '{}')
 
   try {
     const itemService = new ItemService(user)
@@ -26,6 +26,8 @@ export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
       itemData.quantity,
       itemData.passePartoutWidth,
       itemData.passePartoutHeight,
+      itemData.parts,
+      itemData.discount ?? 0,
       itemData.passePartoutId
     )
     if (item === null) return notFound({ message: `OrderId ${orderId} not found` })

@@ -7,5 +7,5 @@ export const env = {
   audience: process.env['AUDIENCE'] ?? '',
   tokenIssuer: process.env['TOKEN_ISSUER'] ?? '',
   jwksUri: process.env['JWKS_URI'] ?? '',
-  matrixBucket: process.env['MATRIX_BUCKET'] ?? '',
+  pricingBucket: process.env['PRICING_BUCKET'] ?? '',
 }

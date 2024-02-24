@@ -1,33 +1,50 @@
 import { v4 as uuidv4 } from 'uuid'
+import { CalculatedItemService } from './calculated-item.service'
 import { OrderService } from './order.service'
 import { InvalidDataError } from '../error/invalid-data.error'
 import { ItemDto } from '../repository/dto/item.dto'
 import { ItemRepository } from '../repository/item.repository'
-import { Item, Order, User } from '../type/api.type'
+import { CalculatedItemPart, Item, ItemResponse, Order, User } from '../type/api.type'
 
 export class ItemService {
   private itemRepository: ItemRepository
   private orderService: OrderService
+  private calculatedItemService: CalculatedItemService
   private readonly storeId: string
 
   constructor(user: User, orderService?: OrderService) {
     this.itemRepository = new ItemRepository()
     this.storeId = user.storeId
     this.orderService = orderService ?? new OrderService(user)
+    this.calculatedItemService = new CalculatedItemService()
   }
 
-  async getItemByOrderIdAndId(orderId: string, itemId: string): Promise<Item | null> {
+  async getItemByOrderIdAndId(orderId: string, itemId: string): Promise<ItemResponse | null> {
     const order = await this.orderService.getOrderById(orderId)
     if (!order) return null
-    const item = await this.itemRepository.getItemById(order.id, itemId)
-    return item ? ItemService.fromDto(item) : null
+    const itemDto = await this.itemRepository.getItemById(order.id, itemId)
+    if (itemDto == null) {
+      return null
+    }
+
+    const item = ItemService.fromDto(itemDto)
+    const calculatedItem = await this.calculatedItemService.getCalculatedItem(item.id)
+    if (calculatedItem == null) return null
+    return {item, calculatedItem}
   }
 
-  async getItemsByOrderId(orderId: string): Promise<Item[] | null> {
+  async getItemsByOrderId(orderId: string): Promise<ItemResponse[] | null> {
     const order = await this.orderService.getOrderById(orderId)
     if (!order) return null
-    const items = await this.itemRepository.getItemsByOrderId(order.id)
-    return items.map(dto => ItemService.fromDto(dto))
+    const itemDtos = await this.itemRepository.getItemsByOrderId(order.id)
+    const itemMap = new Map<string, ItemResponse>()
+    itemDtos.forEach(dto => itemMap.set(dto.itemUuid, {item: ItemService.fromDto(dto)}))
+    const itemIds = Array.from(itemMap.keys())
+    const calculatedItems = await Promise.all(itemIds.map(id => this.calculatedItemService.getCalculatedItem(id)))
+    calculatedItems.forEach(ci => {
+      if (ci != null)  itemMap.get(ci.itemId)!.calculatedItem = ci
+    })
+    return Array.from(itemMap.values())
   }
 
   async createItem(
@@ -41,8 +58,10 @@ export class ItemService {
     quantity: number,
     passePartoutWidth: number,
     passePartoutHeight: number,
+    extraParts: CalculatedItemPart[],
+    discount: number,
     passePartoutId?: string,
-  ): Promise<Item | null> {
+  ): Promise<ItemResponse | null> {
     const verifierdOrder = await this.verifyOrder(orderId)
     if (!verifierdOrder) return null
     const item: Item = {
@@ -63,7 +82,8 @@ export class ItemService {
 
     ItemService.verifyItem(item)
     await this.itemRepository.createItem(ItemService.toDto(item))
-    return item
+    const calculatedItem = await this.calculatedItemService.createCalculatedItem(item, discount, extraParts)
+    return {item, calculatedItem}
   }
 
   private async verifyOrder(orderId?: string, paramOrder?: Order): Promise<Order | null> {
