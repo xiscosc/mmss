@@ -132,6 +132,9 @@
           "quantity": {
             "type": "integer"
           },
+          "isFabric": {
+            "type": "boolean"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -143,7 +146,6 @@
           "moldingId",
           "width",
           "height",
-          "glassId",
           "description",
           "observations",
           "quantity",

@@ -3,4 +3,5 @@ export enum PricingType {
   GLASS = 'glass',
   BACK = 'back',
   PP = 'pp',
+  FABRIC = 'fabric',
 }

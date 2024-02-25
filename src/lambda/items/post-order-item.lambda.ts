@@ -20,7 +20,6 @@ export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
       itemData.moldingId,
       itemData.width,
       itemData.height,
-      itemData.glassId,
       itemData.description,
       itemData.observations,
       itemData.quantity,
@@ -28,7 +27,9 @@ export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
       itemData.passePartoutHeight,
       itemData.parts,
       itemData.discount ?? 0,
+      itemData.isFabric,
       itemData.passePartoutId,
+      itemData.glassId,
     )
     if (item === null) return notFound({ message: `OrderId ${orderId} not found` })
     return created(item)

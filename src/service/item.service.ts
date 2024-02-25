@@ -52,7 +52,6 @@ export class ItemService {
     moldingId: string,
     width: number,
     height: number,
-    glassId: string,
     description: string,
     observations: string,
     quantity: number,
@@ -60,7 +59,9 @@ export class ItemService {
     passePartoutHeight: number,
     extraParts: CalculatedItemPart[],
     discount: number,
+    isFabric = false,
     passePartoutId?: string,
+    glassId?: string,
   ): Promise<ItemResponse | null> {
     const verifierdOrder = await this.verifyOrder(orderId)
     if (!verifierdOrder) return null
@@ -78,6 +79,7 @@ export class ItemService {
       observations,
       quantity,
       createdAt: new Date().toISOString(),
+      isFabric,
     }
 
     ItemService.verifyItem(item)
@@ -134,6 +136,7 @@ export class ItemService {
       observations: item.observations,
       quantity: item.quantity,
       createdAt: Date.parse(item.createdAt),
+      isFabric: item.isFabric ?? false,
     }
   }
 
@@ -152,6 +155,7 @@ export class ItemService {
       observations: dto.observations,
       quantity: dto.quantity,
       createdAt: new Date(dto.createdAt).toISOString(),
+      isFabric: dto.isFabric,
     }
   }
 }

@@ -37,13 +37,23 @@ export class CalculatedItemService {
       item.height + 2 * item.passePartoutHeight,
     )
 
-    const parts = await Promise.all([
-      this.getMoldingPart(item.moldingId, workingWidth, workingHeight),
-      this.getGlassPart(item.glassId, workingWidth, workingHeight),
-      this.getBackPart(workingWidth, workingHeight),
-      this.getPPPart(workingWidth, workingHeight, item.passePartoutId),
-    ])
+    const partPromises = [this.getMoldingPart(item.moldingId, workingWidth, workingHeight)]
 
+    if (item.glassId) {
+      partPromises.push(this.getGlassPart(item.glassId, workingWidth, workingHeight))
+    }
+
+    if (item.isFabric) {
+      partPromises.push(this.getFabricPart(workingWidth, workingHeight))
+    } else {
+      partPromises.push(this.getBackPart(workingWidth, workingHeight))
+    }
+
+    if (item.passePartoutId) {
+      partPromises.push(this.getPPPart(item.passePartoutId, workingWidth, workingHeight))
+    }
+
+    const parts = await Promise.all(partPromises)
     calculatedItem.parts.push(...parts)
     calculatedItem.parts.push(...extraParts)
 
@@ -116,14 +126,22 @@ export class CalculatedItemService {
     }
   }
 
-  private async getPPPart(width: number, height: number, ppId?: string): Promise<CalculatedItemPart> {
-    let ppPrice = 0
-    if (ppId != null) ppPrice = await this.pricingProvider.getAreaValueFromList(PricingType.PP, ppId, height, width)
+  private async getPPPart(ppId: string, width: number, height: number): Promise<CalculatedItemPart> {
+    const ppPrice = await this.pricingProvider.getAreaValueFromList(PricingType.PP, ppId, height, width)
 
     return {
       price: ppPrice,
       quantity: 1,
-      description: ppPrice ? `Passepartout ${ppId} ${width}x${height}` : `No Passepartout`,
+      description: `Passepartout ${ppId} ${width}x${height}`,
+    }
+  }
+
+  private async getFabricPart(width: number, height: number): Promise<CalculatedItemPart> {
+    const fabricPrice = await this.pricingProvider.getValueFromMatrixByDimensions(PricingType.FABRIC, width, height)
+    return {
+      price: fabricPrice,
+      quantity: 1,
+      description: `Estirar tela ${width}x${height}`,
     }
   }
 }
