@@ -1,7 +1,8 @@
-import { PricingFile, PricingProvider } from '../data/pricing.provider'
+import { PricingProvider } from '../data/pricing.provider'
 import { CalculatedItemRepository } from '../repository/calculated-item.repository'
 import { CalculatedItemDto } from '../repository/dto/calculated-item.dto'
 import { CalculatedItem, CalculatedItemPart, Item } from '../type/api.type'
+import { PricingType } from '../type/pricing.type'
 
 export class CalculatedItemService {
   private calculatedItemRepository: CalculatedItemRepository
@@ -83,8 +84,8 @@ export class CalculatedItemService {
   }
 
   private async getMoldingPart(moldingId: string, width: number, height: number): Promise<CalculatedItemPart> {
-    const moldingPrice = await this.pricingProvider.getValueFromListById(PricingFile.MOLDS, moldingId)
-    const moldingFactor = await this.pricingProvider.getValueFromMatrixByDimensions(PricingFile.MOLDS, width, height)
+    const moldingPrice = await this.pricingProvider.getValueFromListById(PricingType.MOLD, moldingId)
+    const moldingFactor = await this.pricingProvider.getValueFromMatrixByDimensions(PricingType.MOLD, width, height)
     return {
       price: moldingPrice * moldingFactor,
       quantity: 1,
@@ -94,7 +95,7 @@ export class CalculatedItemService {
 
   private async getGlassPart(glassId: string, width: number, height: number): Promise<CalculatedItemPart> {
     const glassPrice = await this.pricingProvider.getValueFromMatrixByDimensions(
-      PricingFile.GLASS,
+      PricingType.GLASS,
       width,
       height,
       glassId,
@@ -107,7 +108,7 @@ export class CalculatedItemService {
   }
 
   private async getBackPart(width: number, height: number): Promise<CalculatedItemPart> {
-    const backPrice = await this.pricingProvider.getValueFromMatrixByDimensions(PricingFile.BACK, width, height)
+    const backPrice = await this.pricingProvider.getValueFromMatrixByDimensions(PricingType.BACK, width, height)
     return {
       price: backPrice,
       quantity: 1,
@@ -117,7 +118,7 @@ export class CalculatedItemService {
 
   private async getPPPart(width: number, height: number, ppId?: string): Promise<CalculatedItemPart> {
     let ppPrice = 0
-    if (ppId != null) ppPrice = await this.pricingProvider.getAreaValueFromList(PricingFile.PP, height, width, ppId)
+    if (ppId != null) ppPrice = await this.pricingProvider.getAreaValueFromList(PricingType.PP, ppId, height, width)
 
     return {
       price: ppPrice,

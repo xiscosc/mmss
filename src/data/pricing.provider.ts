@@ -1,101 +1,94 @@
-import { S3, SelectObjectContentCommandInput, SelectObjectContentCommand } from '@aws-sdk/client-s3'
-import { env } from '../config/env'
-
-export enum PricingFile {
-  MOLDS = 'molds',
-  GLASS = 'glass',
-  BACK = 'back',
-  PP = 'pp',
-}
+import { AreaPricingRepository } from '../repository/area-pricing.repository'
+import { MaxArea } from '../repository/dto/area-price.dto'
+import { ListPricingRepository } from '../repository/list-pricing.repository'
+import { MatrixPricingRepository } from '../repository/matrix-pricing.repository'
+import { PricingType } from '../type/pricing.type'
 
 export class PricingProvider {
-  constructor(private s3Client: S3 = new S3()) {}
+  private matrixPricingRepository: MatrixPricingRepository
+  private listPricingRepository: ListPricingRepository
+  private areaPricingRepository: AreaPricingRepository
+
+  constructor() {
+    this.matrixPricingRepository = new MatrixPricingRepository()
+    this.listPricingRepository = new ListPricingRepository()
+    this.areaPricingRepository = new AreaPricingRepository()
+  }
 
   public async getValueFromMatrixByDimensions(
-    pricingType: PricingFile,
+    pricingType: PricingType,
     d1: number,
     d2: number,
-    fileId = 'default',
+    id?: string,
   ): Promise<number> {
-    const fileKey = `${pricingType}/matrix_${fileId}.csv`
-    const dimension = PricingProvider.getDimensionKey(Math.floor(d1), Math.floor(d2))
-
-    const params: SelectObjectContentCommandInput = {
-      Bucket: env.pricingBucket,
-      Key: fileKey,
-      ExpressionType: 'SQL',
-      Expression: `SELECT price FROM S3Object WHERE dimension=${dimension}`,
-      InputSerialization: {
-        CSV: {
-          FileHeaderInfo: 'USE',
-          RecordDelimiter: '\n',
-          FieldDelimiter: ',',
-        },
-      },
-      OutputSerialization: {
-        JSON: {},
-      },
+    const dimension = PricingProvider.getDimensionKey(d1, d2, id)
+    const priceDto = await this.matrixPricingRepository.getByTypeAndDimension(pricingType, dimension)
+    if (priceDto == null) {
+      throw Error('Price not found')
     }
 
-    await this.s3Client.send(new SelectObjectContentCommand(params))
-    return 0
+    return priceDto.price
   }
 
-  public async getValueFromListById(pricingType: PricingFile, id: string, fileId = 'default'): Promise<number> {
-    const fileKey = `${pricingType}/list_${fileId}.csv`
-    const params: SelectObjectContentCommandInput = {
-      Bucket: env.pricingBucket,
-      Key: fileKey,
-      ExpressionType: 'SQL',
-      Expression: `SELECT price FROM S3Object WHERE id=${id}`,
-      InputSerialization: {
-        CSV: {
-          FileHeaderInfo: 'USE',
-          RecordDelimiter: '\n',
-          FieldDelimiter: ',',
-        },
-      },
-      OutputSerialization: {
-        JSON: {},
-      },
+  public async getValueFromListById(pricingType: PricingType, id: string): Promise<number> {
+    const priceDto = await this.listPricingRepository.getByTypeAndId(pricingType, id)
+    if (priceDto == null) {
+      throw Error('Price not found')
     }
 
-    await this.s3Client.send(new SelectObjectContentCommand(params))
-    return 0
+    return priceDto.price
   }
 
-  public async getAreaValueFromList(pricingType: PricingFile, d1: number, d2: number, fileId: string): Promise<number> {
-    const { d1o, d2o } = PricingProvider.getOrderedDimensions(Math.floor(d1), Math.floor(d2))
-    const fileKey = `${pricingType}/area_${fileId}.csv`
-
-    const params: SelectObjectContentCommandInput = {
-      Bucket: env.pricingBucket,
-      Key: fileKey,
-      ExpressionType: 'SQL',
-      Expression: `SELECT price FROM S3Object WHERE d1 >= ${d1o} and d2 >= ${d2o} ORDER BY d1 * d2 LIMIT 1`,
-      InputSerialization: {
-        CSV: {
-          FileHeaderInfo: 'USE',
-          RecordDelimiter: '\n',
-          FieldDelimiter: ',',
-        },
-      },
-      OutputSerialization: {
-        JSON: {},
-      },
+  public async getAreaValueFromList(pricingType: PricingType, id: string, d1d: number, d2d: number): Promise<number> {
+    const { d1, d2 } = PricingProvider.cleanAndOrder(d1d, d2d)
+    const areaDto = await this.areaPricingRepository.getByTypeAndId(pricingType, id)
+    if (areaDto == null || areaDto.areas.length === 0) {
+      throw Error('Price not found')
     }
 
-    await this.s3Client.send(new SelectObjectContentCommand(params))
-    return 0
+    const sortedAreas = PricingProvider.sortByAreaAndPerimeter(areaDto.areas)
+    let index = 0
+    while (index < sortedAreas.length) {
+      const area = sortedAreas[index]!
+      if (area.d1 >= d1 && area.d2 >= d2) return area.price
+      index += 1
+    }
+
+    throw Error('Price not found')
   }
 
-  private static getDimensionKey(height: number, width: number): string {
-    const max = Math.max(height, width)
-    const min = Math.min(height, width)
-    return `${min}x${max}`
+  private static getDimensionKey(height: number, width: number, id?: string): string {
+    const { d1, d2 } = this.cleanAndOrder(height, width)
+    const dimension = `${d1}x${d2}`
+    if (id != null) {
+      return `${id}_${dimension}`
+    }
+
+    return dimension
   }
 
-  private static getOrderedDimensions(height: number, width: number) {
-    return { d1o: Math.max(height, width), d2o: Math.min(height, width) }
+  private static cleanAndOrder(d1d: number, d2d: number) {
+    return { d1: Math.floor(Math.max(d1d, d2d)), d2: Math.floor(Math.min(d1d, d2d)) }
+  }
+
+  private static sortByAreaAndPerimeter(data: MaxArea[]): MaxArea[] {
+    // Calculate area and perimeter for each MaxArea object
+    const areaAndPerimeter = data.map(item => ({
+      ...item,
+      area: item.d1 * item.d2,
+      perimeter: 2 * (item.d1 + item.d2),
+    }))
+
+    // Sort the array based on area and perimeter
+    areaAndPerimeter.sort((a, b) => {
+      if (a.area !== b.area) {
+        return a.area - b.area // Sort by area
+      }
+
+      return a.perimeter - b.perimeter // If area is the same, sort by perimeter
+    })
+
+    // Return the sorted array
+    return areaAndPerimeter
   }
 }

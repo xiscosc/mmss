@@ -52,7 +52,6 @@
     "tsconfig-paths": "4.2.0"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.515.0",
     "@aws-sdk/client-dynamodb": "3.515.0",
     "@aws-sdk/lib-dynamodb": "3.515.0",
     "aws-cdk-lib": "2.129.0",

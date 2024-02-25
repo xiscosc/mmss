@@ -37,6 +37,12 @@ export function createLambdas(
     CUSTOMER_TABLE: dynamoTables.customerTable.tableName,
   }
 
+  const envVarsForPricing = {
+    MATRIX_PRICING_TABLE: dynamoTables.matrixPricingTable.tableName,
+    LIST_PRICING_TABLE: dynamoTables.listPricingTable.tableName,
+    AREA_PRICING_TABLE: dynamoTables.areaPricingTable.tableName,
+  }
+
   const authorizerLambda = createLambda(scope, envName, lambdaDir, '/auth/auth.lambda.ts', 'Auth', 'authorizer', {
     AUDIENCE: audience,
     TOKEN_ISSUER: tokenIssuer,
@@ -120,7 +126,7 @@ export function createLambdas(
     '/items/post-order-item.lambda.ts',
     'Items',
     'postOrderItem',
-    envVarsForItem,
+    { ...envVarsForItem, ...envVarsForPricing },
   )
 
   const getOrderItemLambda = createLambda(
@@ -176,6 +182,12 @@ export function createLambdas(
 
   // Post item lambda needs write access to item order table
   setWritePermissionsForTables([postOrderItemLambda], [dynamoTables.itemOrderTable])
+
+  // Post item lambda needs read access to pricing tables
+  setReadPermissionsForTables(
+    [postOrderItemLambda],
+    [dynamoTables.areaPricingTable, dynamoTables.listPricingTable, dynamoTables.matrixPricingTable],
+  )
 
   return result
 }

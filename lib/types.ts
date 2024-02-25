@@ -28,4 +28,7 @@ export type DynamoTableSet = {
   orderTable: Table
   itemOrderTable: Table
   calculatedItemOrderTable: Table
+  matrixPricingTable: Table
+  listPricingTable: Table
+  areaPricingTable: Table
 }
