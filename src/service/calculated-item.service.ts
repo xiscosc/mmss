@@ -45,8 +45,10 @@ export class CalculatedItemService {
 
     if (item.isFabric) {
       partPromises.push(this.getFabricPart(workingWidth, workingHeight))
-    } else {
-      partPromises.push(this.getBackPart(workingWidth, workingHeight))
+    }
+
+    if (item.backId) {
+      partPromises.push(this.getBackPart(item.backId, workingWidth, workingHeight))
     }
 
     if (item.passePartoutId) {
@@ -94,22 +96,16 @@ export class CalculatedItemService {
   }
 
   private async getMoldingPart(moldingId: string, width: number, height: number): Promise<CalculatedItemPart> {
-    const moldingPrice = await this.pricingProvider.getValueFromListById(PricingType.MOLD, moldingId)
-    const moldingFactor = await this.pricingProvider.getValueFromMatrixByDimensions(PricingType.MOLD, width, height)
+    const moldPrice = await this.pricingProvider.calculatePrice(PricingType.MOLD, width, height, moldingId)
     return {
-      price: moldingPrice * moldingFactor,
+      price: moldPrice,
       quantity: 1,
       description: `Moldura ${moldingId} ${width}x${height}`,
     }
   }
 
   private async getGlassPart(glassId: string, width: number, height: number): Promise<CalculatedItemPart> {
-    const glassPrice = await this.pricingProvider.getValueFromMatrixByDimensions(
-      PricingType.GLASS,
-      width,
-      height,
-      glassId,
-    )
+    const glassPrice = await this.pricingProvider.calculatePrice(PricingType.GLASS, width, height, glassId)
     return {
       price: glassPrice,
       quantity: 1,
@@ -117,17 +113,17 @@ export class CalculatedItemService {
     }
   }
 
-  private async getBackPart(width: number, height: number): Promise<CalculatedItemPart> {
-    const backPrice = await this.pricingProvider.getValueFromMatrixByDimensions(PricingType.BACK, width, height)
+  private async getBackPart(backId: string, width: number, height: number): Promise<CalculatedItemPart> {
+    const backPrice = await this.pricingProvider.calculatePrice(PricingType.BACK, width, height, backId)
     return {
       price: backPrice,
       quantity: 1,
-      description: `Trasera ${width}x${height}`,
+      description: `Trasera ${backId} ${width}x${height}`,
     }
   }
 
   private async getPPPart(ppId: string, width: number, height: number): Promise<CalculatedItemPart> {
-    const ppPrice = await this.pricingProvider.getAreaValueFromList(PricingType.PP, ppId, height, width)
+    const ppPrice = await this.pricingProvider.calculatePrice(PricingType.PP, width, height, ppId)
 
     return {
       price: ppPrice,
@@ -137,7 +133,7 @@ export class CalculatedItemService {
   }
 
   private async getFabricPart(width: number, height: number): Promise<CalculatedItemPart> {
-    const fabricPrice = await this.pricingProvider.getValueFromMatrixByDimensions(PricingType.FABRIC, width, height)
+    const fabricPrice = await this.pricingProvider.calculatePrice(PricingType.FABRIC, width, height)
     return {
       price: fabricPrice,
       quantity: 1,

@@ -5,3 +5,9 @@ export enum PricingType {
   PP = 'pp',
   FABRIC = 'fabric',
 }
+
+export enum PricingFormula {
+  FORMULA_1 = 'formula_1',
+  FORMULA_AREA = 'formula_area',
+  NONE = 'none',
+}

@@ -123,6 +123,9 @@
           "glassId": {
             "type": "string"
           },
+          "backId": {
+            "type": "string"
+          },
           "description": {
             "type": "string"
           },

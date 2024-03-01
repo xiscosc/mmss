@@ -9,9 +9,7 @@ export function createDynamoTables(scope: Construct, envName: string): DynamoTab
     orderTable: createOrderTable(scope, envName),
     itemOrderTable: createItemOrderTable(scope, envName),
     calculatedItemOrderTable: createCalculatedItemOrderTable(scope, envName),
-    matrixPricingTable: createMatrixPricingTable(scope, envName),
     listPricingTable: createListPricingTable(scope, envName),
-    areaPricingTable: createAreaPricingTable(scope, envName),
   }
 }
 
@@ -79,40 +77,10 @@ function createItemOrderTable(scope: Construct, envName: string): Table {
   )
 }
 
-function createMatrixPricingTable(scope: Construct, envName: string): Table {
-  return createTable(
-    scope,
-    `${envName}-matrix-pricing-table`,
-    {
-      name: 'type',
-      type: AttributeType.STRING,
-    },
-    {
-      name: 'dimension',
-      type: AttributeType.STRING,
-    },
-  )
-}
-
 function createListPricingTable(scope: Construct, envName: string): Table {
   return createTable(
     scope,
     `${envName}-list-pricing-table`,
-    {
-      name: 'type',
-      type: AttributeType.STRING,
-    },
-    {
-      name: 'id',
-      type: AttributeType.STRING,
-    },
-  )
-}
-
-function createAreaPricingTable(scope: Construct, envName: string): Table {
-  return createTable(
-    scope,
-    `${envName}-area-pricing-table`,
     {
       name: 'type',
       type: AttributeType.STRING,
