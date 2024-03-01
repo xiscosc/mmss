@@ -7,8 +7,10 @@ import {
   PutCommand,
   BatchGetCommandInput,
   BatchGetCommand,
+  BatchWriteCommand,
 } from '@aws-sdk/lib-dynamodb'
 import * as log from 'lambda-log'
+import _ from 'lodash'
 
 export abstract class DynamoRepository<T> {
   protected readonly table: string
@@ -144,5 +146,49 @@ export abstract class DynamoRepository<T> {
       Item: dto as Record<string, AttributeValue>,
     }
     await this.client.send(new PutCommand(input))
+  }
+
+  protected async batchPut(dtoList: T[]) {
+    const putRequests = dtoList.map(dto => ({
+      PutRequest: {
+        Item: dto as Record<string, AttributeValue>,
+      },
+    }))
+
+    const chunkedRequests = _.chunk(putRequests, 25)
+    const batchPromises = chunkedRequests.map(requests => this.batchWrite(requests))
+    await Promise.all(batchPromises)
+  }
+
+  protected async batchDelete(values: { partitionKey: string; sortKey?: string }[]) {
+    const deleteRequests = values.map(value => {
+      const key = {
+        [this.partitionKey]: value.partitionKey,
+      }
+
+      if (this.sortKey && value.sortKey) {
+        key[this.sortKey] = value.sortKey
+      }
+
+      return {
+        DeleteRequest: {
+          Key: key,
+        },
+      }
+    })
+
+    const chunkedRequests = _.chunk(deleteRequests, 25)
+    const batchPromises = chunkedRequests.map(requests => this.batchWrite(requests))
+    await Promise.all(batchPromises)
+  }
+
+  private async batchWrite(requests: any) {
+    const params = {
+      RequestItems: {
+        [this.table]: requests,
+      },
+    }
+
+    await this.client.send(new BatchWriteCommand(params))
   }
 }
