@@ -144,8 +144,8 @@ export function createLambdas(
     scope,
     envName,
     lambdaDir,
-    '/data/load-mold-prices.lambda.ts',
-    'Data',
+    '/pricing/load-mold-prices.lambda.ts',
+    'Pricing',
     'moldPricesLoader',
     envVarsForPricing,
   )
@@ -154,9 +154,9 @@ export function createLambdas(
     scope,
     envName,
     lambdaDir,
-    '/data/get-prices.lambda.ts',
-    'Data',
-    'moldPricesLoader',
+    '/pricing/get-prices.lambda.ts',
+    'Pricing',
+    'getPrices',
     envVarsForPricing,
   )
 
