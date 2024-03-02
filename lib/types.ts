@@ -22,6 +22,7 @@ export type LambdaSet = {
   getOrderItemLambda: Function
   postOrderItemLambda: Function
   authorizerLambda: Function
+  getPricesLambda: Function
   moldPricesLoaderLambda: Function
 }
 

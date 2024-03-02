@@ -21,6 +21,11 @@ export class PricingProvider {
     this.listPricingRepository = new ListPricingRepository()
   }
 
+  public async getPricingList(type: PricingType): Promise<ListPriceDto[]> {
+    const prices = await this.listPricingRepository.getAllPricesByType(type)
+    return prices
+  }
+
   public async calculatePrice(pricingType: PricingType, d1d: number, d2d: number, id?: string): Promise<number> {
     const { d1, d2 } = PricingProvider.cleanAndOrder(d1d, d2d)
     if (id == null && pricingType !== PricingType.FABRIC) throw Error('Id is required')

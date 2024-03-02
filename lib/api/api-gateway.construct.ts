@@ -32,7 +32,9 @@ export function createApiGateway(scope: Construct, envName: string, lambdaSet: L
 
   const v1Resource = api.root.addResource('v1')
   const customersResource = v1Resource.addResource('customers')
+  const pricesResource = v1Resource.addResource('prices')
   const ordersResource = v1Resource.addResource('orders')
+  const priceTypeResource = pricesResource.addResource('{priceType}')
   const orderIdResource = ordersResource.addResource('{orderId}')
   const customerIdResource = customersResource.addResource('{customerId}')
   const customerSearchResource = customersResource.addResource('search')
@@ -49,6 +51,7 @@ export function createApiGateway(scope: Construct, envName: string, lambdaSet: L
   addMethod(itemsResource, 'GET', lambdaSet.getOrderItemsLambda)
   addMethod(itemsResource, 'POST', lambdaSet.postOrderItemLambda)
   addMethod(itemIdResource, 'GET', lambdaSet.getOrderItemLambda)
+  addMethod(priceTypeResource, 'GET', lambdaSet.getPricesLambda)
 
   return api
 }

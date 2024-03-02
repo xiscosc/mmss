@@ -150,6 +150,16 @@ export function createLambdas(
     envVarsForPricing,
   )
 
+  const getPricesLambda = createLambda(
+    scope,
+    envName,
+    lambdaDir,
+    '/data/get-prices.lambda.ts',
+    'Data',
+    'moldPricesLoader',
+    envVarsForPricing,
+  )
+
   const result = {
     authorizerLambda,
     getCustomerLambda,
@@ -162,6 +172,7 @@ export function createLambdas(
     postOrderItemLambda,
     getOrderItemLambda,
     moldPricesLoaderLambda,
+    getPricesLambda,
   }
 
   // Set tables permissions
@@ -196,7 +207,10 @@ export function createLambdas(
   setWritePermissionsForTables([postOrderItemLambda], [dynamoTables.itemOrderTable])
 
   // Post item and data loader lambdas need read access to pricing table
-  setReadPermissionsForTables([postOrderItemLambda, moldPricesLoaderLambda], [dynamoTables.listPricingTable])
+  setReadPermissionsForTables(
+    [postOrderItemLambda, moldPricesLoaderLambda, getPricesLambda],
+    [dynamoTables.listPricingTable],
+  )
 
   // Data loader lambdas need write access to pricing table
   setWritePermissionsForTables([moldPricesLoaderLambda], [dynamoTables.listPricingTable])
