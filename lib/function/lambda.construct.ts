@@ -3,14 +3,16 @@ import { Table } from 'aws-cdk-lib/aws-dynamodb'
 import { Architecture, Runtime, Function as LambdaFunction } from 'aws-cdk-lib/aws-lambda'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import { RetentionDays } from 'aws-cdk-lib/aws-logs'
+import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications'
 import { Construct } from 'constructs'
-import { DynamoTableSet, LambdaSet } from '../types'
+import { BucketSet, DynamoTableSet, LambdaSet } from '../types'
 
 export function createLambdas(
   scope: Construct,
   envName: string,
   lambdaDir: string,
   dynamoTables: DynamoTableSet,
+  s3buckets: BucketSet,
   audience: string,
   tokenIssuer: string,
   jwksUri: string,
@@ -39,6 +41,7 @@ export function createLambdas(
 
   const envVarsForPricing = {
     LIST_PRICING_TABLE: dynamoTables.listPricingTable.tableName,
+    MOLD_PRICES_BUCKET: s3buckets.moldPricesBucket.bucketName,
   }
 
   const authorizerLambda = createLambda(scope, envName, lambdaDir, '/auth/auth.lambda.ts', 'Auth', 'authorizer', {
@@ -137,6 +140,16 @@ export function createLambdas(
     envVarsForItem,
   )
 
+  const moldPricesLoaderLambda = createLambda(
+    scope,
+    envName,
+    lambdaDir,
+    '/data/load-mold-prices.lambda.ts',
+    'Data',
+    'moldPricesLoader',
+    envVarsForPricing,
+  )
+
   const result = {
     authorizerLambda,
     getCustomerLambda,
@@ -148,6 +161,7 @@ export function createLambdas(
     getOrderItemsLambda,
     postOrderItemLambda,
     getOrderItemLambda,
+    moldPricesLoaderLambda
   }
 
   // Set tables permissions
@@ -181,8 +195,21 @@ export function createLambdas(
   // Post item lambda needs write access to item order table
   setWritePermissionsForTables([postOrderItemLambda], [dynamoTables.itemOrderTable])
 
-  // Post item lambda needs read access to pricing table
-  setReadPermissionsForTables([postOrderItemLambda], [dynamoTables.listPricingTable])
+  // Post item and data loader lambdas need read access to pricing table
+  setReadPermissionsForTables([postOrderItemLambda, moldPricesLoaderLambda], [dynamoTables.listPricingTable])
+
+  // Data loader lambdas need write access to pricing table
+  setWritePermissionsForTables([moldPricesLoaderLambda], [dynamoTables.listPricingTable])
+
+
+  // Set bucket permissions
+  // MoldPricesLoaderLambda needs read access to mold prices bucket
+  s3buckets.moldPricesBucket.grantRead(moldPricesLoaderLambda)
+
+
+  // Set triggers
+  // MoldPricesLoaderLambda needs to be triggered by S3
+  s3buckets.moldPricesBucket.addObjectCreatedNotification(new LambdaDestination(moldPricesLoaderLambda))
 
   return result
 }

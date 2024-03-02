@@ -8,4 +8,5 @@ export const env = {
   tokenIssuer: process.env['TOKEN_ISSUER'] ?? '',
   jwksUri: process.env['JWKS_URI'] ?? '',
   listPricingTable: process.env['LIST_PRICING_TABLE'] ?? '',
+  moldPricesBucket: process.env['MOLD_PRICES_BUCKET'] ?? '',
 }

@@ -1,6 +1,7 @@
 import { StackProps } from 'aws-cdk-lib'
 import { Table } from 'aws-cdk-lib/aws-dynamodb'
 import { Function } from 'aws-cdk-lib/aws-lambda'
+import { Bucket } from 'aws-cdk-lib/aws-s3'
 
 export interface MssStackProps extends StackProps {
   envName: string
@@ -20,6 +21,7 @@ export type LambdaSet = {
   getOrderItemLambda: Function
   postOrderItemLambda: Function
   authorizerLambda: Function
+  moldPricesLoaderLambda: Function
 }
 
 export type DynamoTableSet = {
@@ -29,4 +31,8 @@ export type DynamoTableSet = {
   itemOrderTable: Table
   calculatedItemOrderTable: Table
   listPricingTable: Table
+}
+
+export type BucketSet = {
+  moldPricesBucket: Bucket
 }
