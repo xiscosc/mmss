@@ -161,7 +161,7 @@ export function createLambdas(
     getOrderItemsLambda,
     postOrderItemLambda,
     getOrderItemLambda,
-    moldPricesLoaderLambda
+    moldPricesLoaderLambda,
   }
 
   // Set tables permissions
@@ -201,11 +201,9 @@ export function createLambdas(
   // Data loader lambdas need write access to pricing table
   setWritePermissionsForTables([moldPricesLoaderLambda], [dynamoTables.listPricingTable])
 
-
   // Set bucket permissions
   // MoldPricesLoaderLambda needs read access to mold prices bucket
   s3buckets.moldPricesBucket.grantRead(moldPricesLoaderLambda)
-
 
   // Set triggers
   // MoldPricesLoaderLambda needs to be triggered by S3
