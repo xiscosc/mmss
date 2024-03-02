@@ -2,6 +2,7 @@ import { Stack } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
 import { createApiGateway } from './api/api-gateway.construct'
 import { createDynamoTables } from './database/dynamo-db.construct'
+import { createBuckets } from './file/s3.construct'
 import { createLambdas } from './function/lambda.construct'
 import { MssStackProps } from './types'
 
@@ -16,12 +17,16 @@ export class MssStack extends Stack {
     // Create tables
     const tables = createDynamoTables(this, this.props.envName)
 
+    // Create Buckets
+    const buckets = createBuckets(this, this.props.allowedUploadOrigins, this.props.envName)
+
     // Create lambdas
     const lambdas = createLambdas(
       this,
       this.props.envName,
       LAMBDA_DIR,
       tables,
+      buckets,
       this.props.audience,
       this.props.tokenIssuer,
       this.props.jwksUri,

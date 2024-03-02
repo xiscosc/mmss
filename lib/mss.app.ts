@@ -10,6 +10,7 @@ export class MssApp extends App {
       audience: MssApp.getFromEnv('AUDIENCE'),
       tokenIssuer: MssApp.getFromEnv('TOKEN_ISSUER'),
       jwksUri: MssApp.getFromEnv('JWKS_URI'),
+      allowedUploadOrigins: MssApp.getFromEnv('ALLOWED_UPLOAD_ORIGINS').split(','),
     }
 
     new MssStack(this, `${props.envName}-mss-stack`, props)

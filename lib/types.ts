@@ -8,6 +8,7 @@ export interface MssStackProps extends StackProps {
   audience: string
   tokenIssuer: string
   jwksUri: string
+  allowedUploadOrigins: string[]
 }
 
 export type LambdaSet = {

@@ -44,6 +44,7 @@ jobs:
           AUDIENCE: ${{ secrets.AUDIENCE }}
           TOKEN_ISSUER: ${{ secrets.TOKEN_ISSUER }}
           JWKS_URI: ${{ secrets.JWKS_URI }}
+          ALLOWED_UPLOAD_ORIGINS: '*'
 
       - name: Diff stack
         run: npm run cdk diff
@@ -52,6 +53,7 @@ jobs:
           AUDIENCE: ${{ secrets.AUDIENCE }}
           TOKEN_ISSUER: ${{ secrets.TOKEN_ISSUER }}
           JWKS_URI: ${{ secrets.JWKS_URI }}
+          ALLOWED_UPLOAD_ORIGINS: '*'
 
       - name: Deploy stack
         run: npx cdk deploy --all --require-approval never
@@ -60,6 +62,7 @@ jobs:
           AUDIENCE: ${{ secrets.AUDIENCE }}
           TOKEN_ISSUER: ${{ secrets.TOKEN_ISSUER }}
           JWKS_URI: ${{ secrets.JWKS_URI }}
+          ALLOWED_UPLOAD_ORIGINS: '*'
 
   deploy-prod:
     name: Deploy to prod
