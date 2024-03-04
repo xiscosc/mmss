@@ -22,14 +22,7 @@ export class MssStack extends Stack {
     const buckets = createBuckets(this, this.props.allowedUploadOrigins, this.props.envName)
 
     // Create lambdas
-    const lambdas = createLambdas(
-      this,
-      this.props.envName,
-      LAMBDA_DIR,
-      tables,
-      buckets,
-      this.props.authTokenArn,
-    )
+    const lambdas = createLambdas(this, this.props.envName, LAMBDA_DIR, tables, buckets, this.props.authTokenArn)
 
     createApiGateway(this, this.props.envName, lambdas)
 

@@ -1,8 +1,8 @@
 import { APIGatewayEvent, ProxyResult } from 'aws-lambda'
 import * as log from 'lambda-log'
+import { AuthService } from '../../service/auth.service'
 import { OrderService } from '../../service/order.service'
 import { badRequest, internalServerError, isValidUuid, notFound, ok, unauthorized } from '../api.helper'
-import { AuthService } from '../../service/auth.service'
 
 export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
   const user = AuthService.getUserFromEvent(event)

@@ -19,8 +19,8 @@ export class AuthService {
   public static getUserFromEvent(event: APIGatewayEvent): User | undefined {
     const header = event.headers['user']
     if (header == null) {
-        log.error('User header not found')
-        return undefined
+      log.error('User header not found')
+      return undefined
     }
     const headerParts = header.split('@')
     if (headerParts.length !== 2) {
@@ -31,20 +31,20 @@ export class AuthService {
     const idParts = headerParts[0]!.split('_')
 
     if (idParts.length !== 2) {
-        log.error('Invalid user header')
-        return undefined
+      log.error('Invalid user header')
+      return undefined
     }
 
     const [storeId, name] = idParts
     if (storeId == null || name == null) {
-        log.error('Invalid user header')
-        return undefined
+      log.error('Invalid user header')
+      return undefined
     }
 
     return {
-        id: `${storeId}_${name}`,
-        storeId,
-        name,
+      id: `${storeId}_${name}`,
+      storeId,
+      name,
     }
   }
 

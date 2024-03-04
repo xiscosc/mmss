@@ -41,7 +41,7 @@ export function createLambdas(
   }
 
   const authorizerLambda = createLambda(scope, envName, lambdaDir, '/auth/auth.lambda.ts', 'Auth', 'authorizer', {
-    AUTHORIZER_TOKEN_ARN: authTokenArn
+    AUTHORIZER_TOKEN_ARN: authTokenArn,
   })
 
   const getCustomerLambda = createLambda(

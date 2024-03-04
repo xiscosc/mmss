@@ -57,5 +57,5 @@ function addMethod(resource: Resource, httpMethod: string, lambda: Function): Me
     throw new Error('Authorizer not defined')
   }
 
-  return resource.addMethod(httpMethod, new LambdaIntegration(lambda), { authorizationType: AuthorizationType.NONE })
+  return resource.addMethod(httpMethod, new LambdaIntegration(lambda), { authorizationType: AuthorizationType.CUSTOM })
 }

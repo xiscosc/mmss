@@ -10,5 +10,5 @@ export function addSecretToLambda(
   functions: Function[],
 ) {
   const secret = Secret.fromSecretCompleteArn(scope, `${environment}-${name}`, secretArn)
-  functions.forEach((func) => secret.grantRead(func))
+  functions.forEach(func => secret.grantRead(func))
 }

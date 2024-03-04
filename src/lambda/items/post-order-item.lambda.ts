@@ -1,7 +1,7 @@
 import { APIGatewayEvent, ProxyResult } from 'aws-lambda'
 import * as log from 'lambda-log'
 import { InvalidDataError } from '../../error/invalid-data.error'
-import { AuthService } from '../../service/auth.service';
+import { AuthService } from '../../service/auth.service'
 import { ItemService } from '../../service/item.service'
 import { PostItem } from '../../type/api.type'
 import { badRequest, internalServerError, isValidUuid, notFound, created, unauthorized } from '../api.helper'
