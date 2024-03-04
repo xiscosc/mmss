@@ -41,27 +41,21 @@ jobs:
         run: npm run cdk bootstrap
         env:
           ENV_NAME: dev
-          AUDIENCE: ${{ secrets.AUDIENCE }}
-          TOKEN_ISSUER: ${{ secrets.TOKEN_ISSUER }}
-          JWKS_URI: ${{ secrets.JWKS_URI }}
+          AUTH_TOKEN_ARN: ${{ secrets.AUTH_TOKEN_ARN }}
           ALLOWED_UPLOAD_ORIGINS: '*'
 
       - name: Diff stack
         run: npm run cdk diff
         env:
           ENV_NAME: dev
-          AUDIENCE: ${{ secrets.AUDIENCE }}
-          TOKEN_ISSUER: ${{ secrets.TOKEN_ISSUER }}
-          JWKS_URI: ${{ secrets.JWKS_URI }}
+          AUTH_TOKEN_ARN: ${{ secrets.AUTH_TOKEN_ARN }}
           ALLOWED_UPLOAD_ORIGINS: '*'
 
       - name: Deploy stack
         run: npx cdk deploy --all --require-approval never
         env:
           ENV_NAME: dev
-          AUDIENCE: ${{ secrets.AUDIENCE }}
-          TOKEN_ISSUER: ${{ secrets.TOKEN_ISSUER }}
-          JWKS_URI: ${{ secrets.JWKS_URI }}
+          AUTH_TOKEN_ARN: ${{ secrets.AUTH_TOKEN_ARN }}
           ALLOWED_UPLOAD_ORIGINS: '*'
 
   deploy-prod:
@@ -99,22 +93,16 @@ jobs:
         run: npm run cdk bootstrap
         env:
           ENV_NAME: prod
-          AUDIENCE: ${{ secrets.AUDIENCE }}
-          TOKEN_ISSUER: ${{ secrets.TOKEN_ISSUER }}
-          JWKS_URI: ${{ secrets.JWKS_URI }}
+          AUTH_TOKEN_ARN: ${{ secrets.AUTH_TOKEN_ARN }}
 
       - name: Diff stack
         run: npm run cdk diff
         env:
           ENV_NAME: prod
-          AUDIENCE: ${{ secrets.AUDIENCE }}
-          TOKEN_ISSUER: ${{ secrets.TOKEN_ISSUER }}
-          JWKS_URI: ${{ secrets.JWKS_URI }}
+          AUTH_TOKEN_ARN: ${{ secrets.AUTH_TOKEN_ARN }}
 
       - name: Deploy stack
         run: npx cdk deploy --all --require-approval never
         env:
           ENV_NAME: prod
-          AUDIENCE: ${{ secrets.AUDIENCE }}
-          TOKEN_ISSUER: ${{ secrets.TOKEN_ISSUER }}
-          JWKS_URI: ${{ secrets.JWKS_URI }}
+          AUTH_TOKEN_ARN: ${{ secrets.AUTH_TOKEN_ARN }}

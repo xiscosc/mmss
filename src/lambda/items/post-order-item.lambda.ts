@@ -1,13 +1,13 @@
 import { APIGatewayEvent, ProxyResult } from 'aws-lambda'
 import * as log from 'lambda-log'
-import { getUserFromEvent } from '../../auth/auth.lib'
 import { InvalidDataError } from '../../error/invalid-data.error'
+import { AuthService } from '../../service/auth.service';
 import { ItemService } from '../../service/item.service'
 import { PostItem } from '../../type/api.type'
 import { badRequest, internalServerError, isValidUuid, notFound, created, unauthorized } from '../api.helper'
 
 export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
-  const user = await getUserFromEvent(event)
+  const user = AuthService.getUserFromEvent(event)
   if (!user) return unauthorized({ message: 'Unauthorized' })
   const orderId = event.pathParameters?.['orderId']
   if (!isValidUuid(orderId)) return badRequest({ message: 'Invalid orderId' })

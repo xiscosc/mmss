@@ -4,9 +4,7 @@ export const env = {
   calculatedItemOrderTable: process.env['CALCULATED_ITEM_ORDER_TABLE'] ?? '',
   orderTable: process.env['ORDER_TABLE'] ?? '',
   userTable: process.env['USER_TABLE'] ?? '',
-  audience: process.env['AUDIENCE'] ?? '',
-  tokenIssuer: process.env['TOKEN_ISSUER'] ?? '',
-  jwksUri: process.env['JWKS_URI'] ?? '',
   listPricingTable: process.env['LIST_PRICING_TABLE'] ?? '',
   moldPricesBucket: process.env['MOLD_PRICES_BUCKET'] ?? '',
+  authorizerTokenArn: process.env['AUTHORIZER_TOKEN_ARN'] ?? '',
 }

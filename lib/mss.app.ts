@@ -7,9 +7,7 @@ export class MssApp extends App {
 
     const props = {
       envName: MssApp.getFromEnv('ENV_NAME'),
-      audience: MssApp.getFromEnv('AUDIENCE'),
-      tokenIssuer: MssApp.getFromEnv('TOKEN_ISSUER'),
-      jwksUri: MssApp.getFromEnv('JWKS_URI'),
+      authTokenArn: MssApp.getFromEnv('AUTH_TOKEN_ARN'),
       allowedUploadOrigins: MssApp.getFromEnv('ALLOWED_UPLOAD_ORIGINS').split(','),
     }
 

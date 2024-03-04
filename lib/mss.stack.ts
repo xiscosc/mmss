@@ -4,6 +4,7 @@ import { createApiGateway } from './api/api-gateway.construct'
 import { createDynamoTables } from './database/dynamo-db.construct'
 import { createBuckets } from './file/s3.construct'
 import { createLambdas } from './function/lambda.construct'
+import { addSecretToLambda } from './secret/secret.construct'
 import { MssStackProps } from './types'
 
 const LAMBDA_DIR = `${__dirname}/../src/lambda/`
@@ -27,11 +28,12 @@ export class MssStack extends Stack {
       LAMBDA_DIR,
       tables,
       buckets,
-      this.props.audience,
-      this.props.tokenIssuer,
-      this.props.jwksUri,
+      this.props.authTokenArn,
     )
 
     createApiGateway(this, this.props.envName, lambdas)
+
+    // Add secrets to lambdas
+    addSecretToLambda(this, this.props.envName, this.props.authTokenArn, 'auth', [lambdas.authorizerLambda])
   }
 }

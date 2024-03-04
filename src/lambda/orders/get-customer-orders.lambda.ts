@@ -1,11 +1,11 @@
 import { APIGatewayEvent, ProxyResult } from 'aws-lambda'
 import * as log from 'lambda-log'
-import { getUserFromEvent } from '../../auth/auth.lib'
 import { OrderService } from '../../service/order.service'
 import { badRequest, internalServerError, isValidUuid, notFound, ok, unauthorized } from '../api.helper'
+import { AuthService } from '../../service/auth.service'
 
 export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
-  const user = await getUserFromEvent(event)
+  const user = AuthService.getUserFromEvent(event)
   if (!user) return unauthorized({ message: 'Unauthorized' })
 
   const customerId = event.pathParameters?.['customerId']

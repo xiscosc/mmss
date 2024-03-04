@@ -4,28 +4,12 @@ import { DynamoTableSet } from '../types'
 
 export function createDynamoTables(scope: Construct, envName: string): DynamoTableSet {
   return {
-    userTable: createUserTable(scope, envName),
     customerTable: createCustomerTable(scope, envName),
     orderTable: createOrderTable(scope, envName),
     itemOrderTable: createItemOrderTable(scope, envName),
     calculatedItemOrderTable: createCalculatedItemOrderTable(scope, envName),
     listPricingTable: createListPricingTable(scope, envName),
   }
-}
-
-function createUserTable(scope: Construct, envName: string): Table {
-  return createTable(
-    scope,
-    `${envName}-user`,
-    {
-      name: 'userId',
-      type: AttributeType.STRING,
-    },
-    {
-      name: 'storeId',
-      type: AttributeType.STRING,
-    },
-  )
 }
 
 function createCustomerTable(scope: Construct, envName: string): Table {

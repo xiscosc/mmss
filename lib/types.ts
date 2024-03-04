@@ -5,9 +5,7 @@ import { Bucket } from 'aws-cdk-lib/aws-s3'
 
 export interface MssStackProps extends StackProps {
   envName: string
-  audience: string
-  tokenIssuer: string
-  jwksUri: string
+  authTokenArn: string
   allowedUploadOrigins: string[]
 }
 
@@ -27,7 +25,6 @@ export type LambdaSet = {
 }
 
 export type DynamoTableSet = {
-  userTable: Table
   customerTable: Table
   orderTable: Table
   itemOrderTable: Table

@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
+import { AuthService } from './auth.service'
 import { CustomerService } from './customer.service'
-import { UserService } from './user.service'
 import { OrderDto } from '../repository/dto/order.dto'
 import { OrderRepository } from '../repository/order.repository'
 import { Customer, Order, User } from '../type/api.type'
@@ -9,23 +9,20 @@ export class OrderService {
   private readonly storeId: string
   private repository: OrderRepository
   private customerService: CustomerService
-  private userService: UserService
   private currentUser: User
 
-  constructor(user: User, customerService?: CustomerService, userService?: UserService) {
+  constructor(user: User, customerService?: CustomerService) {
     this.storeId = user.storeId
     this.repository = new OrderRepository()
     this.customerService = customerService ?? new CustomerService(user)
-    this.userService = userService ?? new UserService()
     this.currentUser = user
   }
 
   async getOrderById(orderId: string): Promise<Order | null> {
     const orderDto = await this.repository.getOrderById(orderId)
     if (orderDto && orderDto.storeId === this.storeId) {
-      const customerPromise = this.customerService.getCustomerById(orderDto.customerUuid)
-      const userPromise = this.userService.getUserById(orderDto.userId)
-      const [customer, user] = await Promise.all([customerPromise, userPromise])
+      const user = AuthService.generateUserFromId(orderDto.userId)
+      const customer = await this.customerService.getCustomerById(orderDto.customerUuid)
       if (customer && user) {
         return OrderService.fromDto(orderDto, customer, user)
       }
@@ -40,7 +37,7 @@ export class OrderService {
     const orderDtos = await this.repository.getOrdersByCustomerId(customerId)
     const filteredOrderDtos = orderDtos.filter(dto => dto.storeId === this.storeId)
     if (filteredOrderDtos.length > 0) {
-      const users = await this.userService.getUsersByIds(new Set(filteredOrderDtos.map(dto => dto.userId)))
+      const users = AuthService.generateUsersFromIds(new Set(filteredOrderDtos.map(dto => dto.userId)))
       const orders = filteredOrderDtos.map(dto => OrderService.fromDto(dto, customer, users.get(dto.userId)!))
       return orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     }

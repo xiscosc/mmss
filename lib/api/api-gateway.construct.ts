@@ -1,4 +1,3 @@
-// import { Duration } from 'aws-cdk-lib'
 import {
   AuthorizationType,
   EndpointType,
@@ -6,14 +5,13 @@ import {
   Method,
   Resource,
   RestApi,
-  // TokenAuthorizer,
+  TokenAuthorizer,
 } from 'aws-cdk-lib/aws-apigateway'
 import { Function } from 'aws-cdk-lib/aws-lambda'
 import { Construct } from 'constructs'
 import { LambdaSet } from '../types'
-// import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 
-// let authorizer: TokenAuthorizer
+let authorizer: TokenAuthorizer
 
 export function createApiGateway(scope: Construct, envName: string, lambdaSet: LambdaSet): RestApi {
   const api = new RestApi(scope, `${envName}-trackListApi`, {
@@ -23,13 +21,10 @@ export function createApiGateway(scope: Construct, envName: string, lambdaSet: L
     },
   })
 
-  // authorizer = new TokenAuthorizer(scope, `${envName}-apiAuthorizer`, {
-  //   handler: lambdaSet.authorizerLambda,
-  //   identitySource: 'method.request.header.Authorization',
-  //   resultsCacheTtl: Duration.minutes(0),
-  //   // eslint-disable-next-line no-useless-escape
-  //   validationRegex: `^Bearer [-0-9a-zA-z\.]*$`,
-  // })
+  authorizer = new TokenAuthorizer(scope, `${envName}-apiAuthorizer`, {
+    handler: lambdaSet.authorizerLambda,
+    identitySource: 'method.request.header.Authorization',
+  })
 
   const v1Resource = api.root.addResource('v1')
   const customersResource = v1Resource.addResource('customers')
@@ -58,9 +53,9 @@ export function createApiGateway(scope: Construct, envName: string, lambdaSet: L
 }
 
 function addMethod(resource: Resource, httpMethod: string, lambda: Function): Method {
-  // if (authorizer === undefined) {
-  //   throw new Error('Authorizer not defined')
-  // }
+  if (authorizer === undefined) {
+    throw new Error('Authorizer not defined')
+  }
 
   return resource.addMethod(httpMethod, new LambdaIntegration(lambda), { authorizationType: AuthorizationType.NONE })
 }

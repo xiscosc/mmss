@@ -13,13 +13,9 @@ export function createLambdas(
   lambdaDir: string,
   dynamoTables: DynamoTableSet,
   s3buckets: BucketSet,
-  audience: string,
-  tokenIssuer: string,
-  jwksUri: string,
+  authTokenArn: string,
 ): LambdaSet {
-  const defaultEnvVars = {
-    USER_TABLE: dynamoTables.userTable.tableName,
-  }
+  const defaultEnvVars = {}
 
   const envVarsForCustomer = {
     ...defaultEnvVars,
@@ -45,9 +41,7 @@ export function createLambdas(
   }
 
   const authorizerLambda = createLambda(scope, envName, lambdaDir, '/auth/auth.lambda.ts', 'Auth', 'authorizer', {
-    AUDIENCE: audience,
-    TOKEN_ISSUER: tokenIssuer,
-    JWKS_URI: jwksUri,
+    AUTHORIZER_TOKEN_ARN: authTokenArn
   })
 
   const getCustomerLambda = createLambda(
@@ -174,13 +168,6 @@ export function createLambdas(
     moldPricesLoaderLambda,
     getPricesLambda,
   }
-
-  // Set tables permissions
-  // All lambdas need read access to user table, except for the authorizerLambda
-  setReadPermissionsForTables(
-    Object.values(result).filter(l => l !== authorizerLambda),
-    [dynamoTables.userTable],
-  )
 
   // All lambdas need read access to customer table, except for the postCustomerLambda and the authorizerLambda
   setReadPermissionsForTables(
