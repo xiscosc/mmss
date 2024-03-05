@@ -124,12 +124,17 @@ export function getFabricPrice(d1: number, d2: number): number {
   return Math.ceil((0.0308 * x + 1.95) * 10) / 10
 }
 
-export function formula1Pricing(m2Price: number, d1: number, d2: number): number {
+export function leftoverPricing(m2Price: number, d1: number, d2: number): number {
   const x = (d1 / 100) * (d2 / 100) * m2Price * defaultTax * 5 + 2
   return Math.ceil(x * 10) / 10
 }
 
-export function formulaAreaPricing(areas: MaxArea[], d1: number, d2: number): number {
+export function areaPricing(m2Price: number, d1: number, d2: number): number {
+  const x = (d1 / 100) * (d2 / 100) * m2Price
+  return Math.ceil(x * 100) / 100
+}
+
+export function fitAreaPricing(areas: MaxArea[], d1: number, d2: number): number {
   if (areas.length === 0) {
     throw Error('Price not found')
   }

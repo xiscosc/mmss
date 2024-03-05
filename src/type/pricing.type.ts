@@ -8,7 +8,8 @@ export enum PricingType {
 }
 
 export enum PricingFormula {
-  FORMULA_1 = 'formula_1',
+  FORMULA_LEFTOVER = 'formula_leftover',
+  FORMULA_FIT_AREA = 'formula_fit_area',
   FORMULA_AREA = 'formula_area',
   NONE = 'none',
 }

@@ -1,4 +1,4 @@
-import { formula1Pricing, formulaAreaPricing, getFabricPrice, getMoldPrice } from './static-pricing'
+import { leftoverPricing, fitAreaPricing, getFabricPrice, getMoldPrice, areaPricing } from './static-pricing'
 import { ListPriceDto } from '../repository/dto/list-price.dto'
 import { ListPricingRepository } from '../repository/list-pricing.repository'
 import { PricingFormula, PricingType } from '../type/pricing.type'
@@ -63,10 +63,12 @@ export class PricingProvider {
 
   private static getPriceByFormula(priceInfo: ListPriceDto, d1: number, d2: number): number {
     switch (priceInfo.formula) {
-      case PricingFormula.FORMULA_1:
-        return formula1Pricing(priceInfo.price, d1, d2)
+      case PricingFormula.FORMULA_LEFTOVER:
+        return leftoverPricing(priceInfo.price, d1, d2)
+      case PricingFormula.FORMULA_FIT_AREA:
+        return fitAreaPricing(priceInfo.areas, d1, d2)
       case PricingFormula.FORMULA_AREA:
-        return formulaAreaPricing(priceInfo.areas, d1, d2)
+        return areaPricing(priceInfo.price, d1, d2)
       default:
         throw Error('Formula not found')
     }
