@@ -4,7 +4,7 @@ import { OrderService } from './order.service'
 import { InvalidDataError } from '../error/invalid-data.error'
 import { ItemDto } from '../repository/dto/item.dto'
 import { ItemRepository } from '../repository/item.repository'
-import { CalculatedItemPart, Item, ItemResponse, Order, User } from '../type/api.type'
+import { CalculatedItem, CalculatedItemPart, Item, ItemResponse, Order, User } from '../type/api.type'
 
 export class ItemService {
   private itemRepository: ItemRepository
@@ -37,14 +37,19 @@ export class ItemService {
     const order = await this.orderService.getOrderById(orderId)
     if (!order) return null
     const itemDtos = await this.itemRepository.getItemsByOrderId(order.id)
-    const itemMap = new Map<string, ItemResponse>()
-    itemDtos.forEach(dto => itemMap.set(dto.itemUuid, { item: ItemService.fromDto(dto) }))
+    const itemMap = new Map<string, Item>()
+    itemDtos.forEach(dto => itemMap.set(dto.itemUuid, ItemService.fromDto(dto)))
     const itemIds = Array.from(itemMap.keys())
     const calculatedItems = await Promise.all(itemIds.map(id => this.calculatedItemService.getCalculatedItem(id)))
+    const calculatedItemMap = new Map<string, CalculatedItem>()
     calculatedItems.forEach(ci => {
-      if (ci != null) itemMap.get(ci.itemId)!.calculatedItem = ci
+      if (ci != null) calculatedItemMap.set(ci.itemId, ci)
     })
-    return Array.from(itemMap.values())
+
+    return Array.from(calculatedItemMap.keys()).map(id => ({
+      item: itemMap.get(id)!,
+      calculatedItem: calculatedItemMap.get(id)!,
+    }))
   }
 
   async createItem(
