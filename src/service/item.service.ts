@@ -107,7 +107,6 @@ export class ItemService {
       !item.moldingId ||
       !item.width ||
       !item.height ||
-      !item.glassId ||
       !item.description ||
       !item.observations ||
       !item.quantity ||
@@ -117,7 +116,7 @@ export class ItemService {
     }
 
     if (item.passePartoutId != null && (item.passePartoutWidth == null || item.passePartoutHeight == null)) {
-      throw new InvalidDataError('Invalid item data')
+      throw new InvalidDataError('Invalid pp item data')
     }
   }
 

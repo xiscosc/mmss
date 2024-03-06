@@ -64,7 +64,7 @@ function createItemOrderTable(scope: Construct, envName: string): Table {
 function createListPricingTable(scope: Construct, envName: string): Table {
   return createTable(
     scope,
-    `${envName}-list-pricing-table`,
+    `${envName}-list-pricing`,
     {
       name: 'type',
       type: AttributeType.STRING,
