@@ -1,4 +1,4 @@
-import { components } from '../generated/mss.openapi'
+import { components } from '../generated/mmss.openapi'
 
 export type Customer = components['schemas']['Customer']
 export type Order = components['schemas']['Order']

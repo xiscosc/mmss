@@ -1,3 +1,3 @@
-import { MssApp } from '../lib/mss.app'
+import { MmSsApp } from '../lib/mmss.app'
 
-new MssApp()
+new MmSsApp()
