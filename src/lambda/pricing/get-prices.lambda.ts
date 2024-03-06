@@ -9,17 +9,20 @@ export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
   const user = AuthService.getUserFromEvent(event)
   if (!user) return unauthorized({ message: 'Unauthorized' })
 
+
   const priceTypeParam = event.queryStringParameters?.['priceType']
-  let priceType: PricingType
-  try {
-    priceType = PricingType[priceTypeParam as keyof typeof PricingType]
-  } catch (err) {
-    return badRequest({ message: `Invalid priceType ${priceTypeParam}` })
+  if (!priceTypeParam) return badRequest({ message: 'Missing priceType parameter' })
+  const priceTypeMap: { [key: string]: PricingType } = {
+    mold: PricingType.MOLD,
+    other: PricingType.OTHER,
+    fabric: PricingType.FABRIC,
+    glass: PricingType.GLASS,
+    back: PricingType.BACK,
+    pp: PricingType.PP,
   }
 
-  if (!priceType) {
-    return badRequest({ message: 'Invalid priceType' })
-  }
+  const priceType = priceTypeMap[priceTypeParam]
+  if (!priceType) return badRequest({ message: `Invalid priceType: ${priceTypeParam}` })
 
   try {
     const pricingProvider = new PricingProvider()
