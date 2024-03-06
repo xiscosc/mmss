@@ -14,7 +14,7 @@ export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
   try {
     priceType = PricingType[priceTypeParam as keyof typeof PricingType]
   } catch (err) {
-    return badRequest({ message: 'Invalid priceType' })
+    return badRequest({ message: `Invalid priceType ${priceTypeParam}` })
   }
 
   if (!priceType) {

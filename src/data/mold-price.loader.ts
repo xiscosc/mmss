@@ -46,19 +46,31 @@ export class MoldPriceLoader {
 
       if (internalId && externalId && price) {
         const id = `${internalId.v}_${externalId.v}`
-        prices.set(id, {
-          id,
-          price: Math.ceil(price.v * 100) / 100,
-          description: '',
-          type: PricingType.MOLD,
-          formula: PricingFormula.NONE,
-          areas: [],
-        })
+        if (Number.isNaN(Number(price.v))) {
+          const cleanPrice = price.v.toString().replace(' ', '').replace(',', '.')
+          if (!Number.isNaN(Number(cleanPrice))) {
+            const calcPrice = Math.ceil(Number(cleanPrice) * 100) / 100
+            prices.set(id, MoldPriceLoader.createPricing(id, calcPrice))
+          }
+        } else {
+          prices.set(id, MoldPriceLoader.createPricing(id, Math.ceil(Number(price.v) * 100) / 100))
+        }
       }
       count += 1
     }
 
     return prices
+  }
+
+  private static createPricing(id: string, price: number): ListPriceDto {
+    return {
+      id,
+      price,
+      description: '',
+      type: PricingType.MOLD,
+      formula: PricingFormula.NONE,
+      areas: [],
+    }
   }
 
   private async getExcelFromS3(fileName: string): Promise<Buffer> {

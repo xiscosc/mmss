@@ -18,6 +18,10 @@ export class ListPricingRepository extends DynamoRepository<ListPriceDto> {
   }
 
   public async batchStoreListPrices(prices: ListPriceDto[]): Promise<void> {
+    if (prices.length === 0) {
+      return
+    }
+    
     await this.batchPut(prices)
   }
 
@@ -28,7 +32,9 @@ export class ListPricingRepository extends DynamoRepository<ListPriceDto> {
 
   public async deleteListPrices(type: PricingType, ids: string[]): Promise<void> {
     const params = ids.map(id => ({ partitionKey: type, sortKey: id }))
-    await this.batchDelete(params)
+    if (params.length > 0) {
+      await this.batchDelete(params)
+    }
   }
 
   public async deleteListPrice(type: PricingType, id: string): Promise<void> {
