@@ -1,3 +1,4 @@
+import { Duration } from 'aws-cdk-lib'
 import {
   AuthorizationType,
   EndpointType,
@@ -24,6 +25,7 @@ export function createApiGateway(scope: Construct, envName: string, lambdaSet: L
   authorizer = new TokenAuthorizer(scope, `${envName}-apiAuthorizer`, {
     handler: lambdaSet.authorizerLambda,
     identitySource: 'method.request.header.Authorization',
+    resultsCacheTtl: Duration.seconds(0),
   })
 
   const v1Resource = api.root.addResource('v1')
