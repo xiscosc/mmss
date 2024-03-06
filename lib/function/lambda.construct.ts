@@ -33,6 +33,7 @@ export function createLambdas(
     ITEM_ORDER_TABLE: dynamoTables.itemOrderTable.tableName,
     ORDER_TABLE: dynamoTables.orderTable.tableName,
     CUSTOMER_TABLE: dynamoTables.customerTable.tableName,
+    CALCULATED_ITEM_ORDER_TABLE: dynamoTables.calculatedItemOrderTable.tableName,
   }
 
   const envVarsForPricing = {
@@ -188,10 +189,16 @@ export function createLambdas(
   setWritePermissionsForTables([postCustomerOrderLambda], [dynamoTables.orderTable])
 
   // Get item lambdas need read access to item order table
-  setReadPermissionsForTables([getOrderItemsLambda, getOrderItemLambda], [dynamoTables.itemOrderTable])
+  setReadPermissionsForTables(
+    [getOrderItemsLambda, getOrderItemLambda],
+    [dynamoTables.itemOrderTable, dynamoTables.calculatedItemOrderTable],
+  )
 
   // Post item lambda needs write access to item order table
-  setWritePermissionsForTables([postOrderItemLambda], [dynamoTables.itemOrderTable])
+  setWritePermissionsForTables(
+    [postOrderItemLambda],
+    [dynamoTables.itemOrderTable, dynamoTables.calculatedItemOrderTable],
+  )
 
   // Post item and data loader lambdas need read access to pricing table
   setReadPermissionsForTables(

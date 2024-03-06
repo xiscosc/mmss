@@ -21,7 +21,7 @@ export class ListPricingRepository extends DynamoRepository<ListPriceDto> {
     if (prices.length === 0) {
       return
     }
-    
+
     await this.batchPut(prices)
   }
 

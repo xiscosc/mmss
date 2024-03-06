@@ -9,7 +9,6 @@ export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
   const user = AuthService.getUserFromEvent(event)
   if (!user) return unauthorized({ message: 'Unauthorized' })
 
-
   const priceTypeParam = event.queryStringParameters?.['priceType']
   if (!priceTypeParam) return badRequest({ message: 'Missing priceType parameter' })
   const priceTypeMap: { [key: string]: PricingType } = {
