@@ -8,6 +8,10 @@ export function badRequest(message: object): ProxyResult {
   return getResponse(400, message)
 }
 
+export function conflict(message: object): ProxyResult {
+  return getResponse(409, message)
+}
+
 export function unauthorized(message: object): ProxyResult {
   return getResponse(401, message)
 }

@@ -4,7 +4,7 @@ import { InvalidDataError } from '../../error/invalid-data.error'
 import { AuthService } from '../../service/auth.service'
 import { CustomerService } from '../../service/customer.service'
 import { Customer } from '../../type/api.type'
-import { badRequest, internalServerError, created, unauthorized } from '../api.helper'
+import { badRequest, internalServerError, created, unauthorized, conflict } from '../api.helper'
 
 export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
   const user = AuthService.getUserFromEvent(event)
@@ -14,7 +14,16 @@ export async function handler(event: APIGatewayEvent): Promise<ProxyResult> {
 
   try {
     const service = new CustomerService(user)
-    const customer = await service.createCustomer(customerData.name!, customerData.phone!)
+    if (customerData.phone == null || customerData.name == null) {
+      return badRequest({ message: 'Missing phone and/or name' })
+    }
+
+    const existingCustomer = await service.getCustomerByPhone(customerData.phone)
+    if (existingCustomer) {
+      return conflict({ message: `Customer with phone ${customerData.phone} already exists` })
+    }
+
+    const customer = await service.createCustomer(customerData.name, customerData.phone)
     return created(customer)
   } catch (err: any) {
     if (err instanceof InvalidDataError) {
