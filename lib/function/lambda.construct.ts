@@ -143,6 +143,7 @@ export function createLambdas(
     'Pricing',
     'moldPricesLoader',
     envVarsForPricing,
+    { memorySize: 512, timeout: Duration.seconds(20) },
   )
 
   const getPricesLambda = createLambda(
@@ -228,13 +229,14 @@ function createLambda(
   tag: string,
   functionName: string,
   envVars: Record<string, string>,
+  extraProps: Record<string, any> = {},
 ): LambdaFunction {
   const lambda = new NodejsFunction(scope, `${envName}-${functionName}`, {
     runtime: Runtime.NODEJS_20_X,
     architecture: Architecture.ARM_64,
     memorySize: 256,
-    handler: 'handler',
     timeout: Duration.seconds(10),
+    handler: 'handler',
     logRetention: RetentionDays.ONE_MONTH,
     bundling: {
       minify: true,
@@ -243,6 +245,7 @@ function createLambda(
     functionName: `${envName}-${functionName}`,
     entry: `${lambdaDir}/${path}`,
     environment: envVars,
+    ...extraProps,
   })
 
   setFunctionTags(lambda, tag, envName)
