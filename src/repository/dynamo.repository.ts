@@ -26,9 +26,15 @@ export abstract class DynamoRepository<T> {
     this.table = tableName
     this.partitionKey = partitionKeyName
     this.sortKey = sortKeyName
-    this.client = DynamoDBDocument.from(new DynamoDBClient({}), {
-      marshallOptions: { removeUndefinedValues: true },
-    })
+
+    try {
+      this.client = DynamoDBDocument.from(new DynamoDBClient({}), {
+        marshallOptions: { removeUndefinedValues: true },
+      })
+    } catch (error: any) {
+      this.logError('constructor', error)
+      throw error
+    }
   }
 
   protected async getByUuid(uuid: string): Promise<T | null> {
@@ -51,7 +57,7 @@ export abstract class DynamoRepository<T> {
         return response.Items[0] as T
       }
     } catch (error: any) {
-      log.error(error)
+      this.logError('getByUuid', error)
       throw error
     }
 
@@ -83,6 +89,7 @@ export abstract class DynamoRepository<T> {
         return response.Item as T
       }
     } catch (error: any) {
+      this.logError('get', error)
       log.error(error)
       throw error
     }
@@ -109,7 +116,7 @@ export abstract class DynamoRepository<T> {
         return response.Items as T[]
       }
     } catch (error: any) {
-      log.error(error)
+      this.logError('getByPartitionKey', error)
       throw error
     }
 
@@ -133,7 +140,7 @@ export abstract class DynamoRepository<T> {
         return response.Responses[this.table] as T[]
       }
     } catch (error: any) {
-      log.error(error)
+      this.logError('getByPartitionKeys', error)
       throw error
     }
 
@@ -145,7 +152,13 @@ export abstract class DynamoRepository<T> {
       TableName: this.table,
       Item: dto as Record<string, AttributeValue>,
     }
-    await this.client.send(new PutCommand(input))
+
+    try {
+      await this.client.send(new PutCommand(input))
+    } catch (error: any) {
+      this.logError('put', error)
+      throw error
+    }
   }
 
   protected async batchPut(dtoList: T[]) {
@@ -157,7 +170,13 @@ export abstract class DynamoRepository<T> {
 
     const chunkedRequests = _.chunk(putRequests, 25)
     const batchPromises = chunkedRequests.map(requests => this.batchWrite(requests))
-    await Promise.all(batchPromises)
+
+    try {
+      await Promise.all(batchPromises)
+    } catch (error: any) {
+      this.logError('batchPut', error)
+      throw error
+    }
   }
 
   protected async batchDelete(values: { partitionKey: string; sortKey?: string }[]) {
@@ -179,7 +198,12 @@ export abstract class DynamoRepository<T> {
 
     const chunkedRequests = _.chunk(deleteRequests, 25)
     const batchPromises = chunkedRequests.map(requests => this.batchWrite(requests))
-    await Promise.all(batchPromises)
+    try {
+      await Promise.all(batchPromises)
+    } catch (error: any) {
+      this.logError('batchDelete', error)
+      throw error
+    }
   }
 
   private async batchWrite(requests: any) {
@@ -189,6 +213,19 @@ export abstract class DynamoRepository<T> {
       },
     }
 
-    await this.client.send(new BatchWriteCommand(params))
+    try {
+      await this.client.send(new BatchWriteCommand(params))
+    } catch (error: any) {
+      this.logError('batchWrite', error)
+      throw error
+    }
+  }
+
+  private logError(functionName: string, error: any) {
+    log.error(
+      `Error repo ${this.table}, partitionKey ${this.partitionKey}, sortkey ${
+        this.sortKey
+      }, and function ${functionName}: ${error.toString()}`,
+    )
   }
 }
