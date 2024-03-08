@@ -6,11 +6,10 @@ import { PricingType } from '../type/pricing.type'
 
 export class CalculatedItemService {
   private calculatedItemRepository: CalculatedItemRepository
-  private pricingProvider: PricingProvider
+  private pricingProvider: PricingProvider | undefined
 
   constructor() {
     this.calculatedItemRepository = new CalculatedItemRepository()
-    this.pricingProvider = new PricingProvider()
   }
 
   public async getCalculatedItem(itemId: string): Promise<CalculatedItem | null> {
@@ -96,7 +95,7 @@ export class CalculatedItemService {
   }
 
   private async getMoldingPart(moldingId: string, width: number, height: number): Promise<CalculatedItemPart> {
-    const moldPrice = await this.pricingProvider.calculatePrice(PricingType.MOLD, width, height, moldingId)
+    const moldPrice = await this.getPricingProvider().calculatePrice(PricingType.MOLD, width, height, moldingId)
     return {
       price: moldPrice,
       quantity: 1,
@@ -105,7 +104,7 @@ export class CalculatedItemService {
   }
 
   private async getGlassPart(glassId: string, width: number, height: number): Promise<CalculatedItemPart> {
-    const glassPrice = await this.pricingProvider.calculatePrice(PricingType.GLASS, width, height, glassId)
+    const glassPrice = await this.getPricingProvider().calculatePrice(PricingType.GLASS, width, height, glassId)
     return {
       price: glassPrice,
       quantity: 1,
@@ -114,7 +113,7 @@ export class CalculatedItemService {
   }
 
   private async getBackPart(backId: string, width: number, height: number): Promise<CalculatedItemPart> {
-    const backPrice = await this.pricingProvider.calculatePrice(PricingType.BACK, width, height, backId)
+    const backPrice = await this.getPricingProvider().calculatePrice(PricingType.BACK, width, height, backId)
     return {
       price: backPrice,
       quantity: 1,
@@ -123,7 +122,7 @@ export class CalculatedItemService {
   }
 
   private async getPPPart(ppId: string, width: number, height: number): Promise<CalculatedItemPart> {
-    const ppPrice = await this.pricingProvider.calculatePrice(PricingType.PP, width, height, ppId)
+    const ppPrice = await this.getPricingProvider().calculatePrice(PricingType.PP, width, height, ppId)
 
     return {
       price: ppPrice,
@@ -133,11 +132,19 @@ export class CalculatedItemService {
   }
 
   private async getFabricPart(width: number, height: number): Promise<CalculatedItemPart> {
-    const fabricPrice = await this.pricingProvider.calculatePrice(PricingType.FABRIC, width, height)
+    const fabricPrice = await this.getPricingProvider().calculatePrice(PricingType.FABRIC, width, height)
     return {
       price: fabricPrice,
       quantity: 1,
       description: `Estirar tela ${width}x${height}`,
     }
+  }
+
+  private getPricingProvider(): PricingProvider {
+    if (!this.pricingProvider) {
+      this.pricingProvider = new PricingProvider()
+    }
+
+    return this.pricingProvider
   }
 }

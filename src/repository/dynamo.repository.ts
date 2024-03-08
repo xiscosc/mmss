@@ -20,7 +20,7 @@ export abstract class DynamoRepository<T> {
 
   protected constructor(tableName: string, partitionKeyName: string, sortKeyName?: string) {
     if (!tableName || !partitionKeyName) {
-      throw new Error('Invalid table or partition key name')
+      throw new Error(`Invalid table or partition key name ${tableName} / ${partitionKeyName}`)
     }
 
     this.table = tableName
@@ -221,11 +221,15 @@ export abstract class DynamoRepository<T> {
     }
   }
 
-  private logError(functionName: string, error: any) {
+  private logError(functionName: string, error: any, otherInfo?: object) {
     log.error(
       `Error repo ${this.table}, partitionKey ${this.partitionKey}, sortkey ${
         this.sortKey
       }, and function ${functionName}: ${error.toString()}`,
     )
+
+    if (otherInfo) {
+      log.error(JSON.stringify(otherInfo))
+    }
   }
 }
