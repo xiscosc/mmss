@@ -1,6 +1,5 @@
 import { Duration } from 'aws-cdk-lib'
 import {
-  AuthorizationType,
   EndpointType,
   LambdaIntegration,
   Method,
@@ -58,8 +57,10 @@ function addMethod(resource: Resource, httpMethod: string, lambda: Function): Me
     throw new Error('Authorizer not defined')
   }
 
-  return resource.addMethod(httpMethod, new LambdaIntegration(lambda), {
-    authorizationType: AuthorizationType.CUSTOM,
-    authorizer,
-  })
+  // return resource.addMethod(httpMethod, new LambdaIntegration(lambda), {
+  //   authorizationType: AuthorizationType.CUSTOM,
+  //   authorizer,
+  // })
+
+  return resource.addMethod(httpMethod, new LambdaIntegration(lambda))
 }
